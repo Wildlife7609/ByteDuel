@@ -1,28 +1,16 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { RouterView } from 'vue-router';
+import NavBar from './components/NavBar.vue'
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
-const botList = ref([])
-onMounted(async () => {
-  try {
-    const res = await fetch('http://127.0.0.1:8080/pk/getbotinfo/')
-    botList.value = await res.json()
-  }
-  catch (e) {
-    console.error(e)
-  }
-})
+components: {
+  NavBar
+}
+
 </script>
 
 <template>
-  <div class="container">
-    <h1>Robot Arena</h1>
-    <div v-for="bot in botList" :key="bot.id" class="bot">
-      <span> bot-name: {{ bot.name }}</span>
-      <span> bot-attack: {{ bot.attack }}</span>
-      <span> bot-rating: {{ bot.rating }}</span>
-    </div>
-  </div>
+  <NavBar />
   <RouterView />
 </template>
 
@@ -33,7 +21,5 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   min-height: 100vh;
-  margin: 10px;
-
 }
 </style>
