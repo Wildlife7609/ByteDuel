@@ -1,11 +1,10 @@
 <script setup>
-import ContentField from '@/components/ContentField.vue'
+import PlayGround from '@/components/PlayGround.vue'
+
 </script>
 
 <template>
-    <ContentField>
-        <div>对战</div>
-    </ContentField>
+    <PlayGround />
 </template>
 
 <style scoped></style>
