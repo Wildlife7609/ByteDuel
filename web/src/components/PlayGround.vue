@@ -1,10 +1,10 @@
 <script setup>
-
+import GameMap from "@/components/GameMap.vue";
 </script>
 
 <template>
     <div class="playground">
-        <canvas></canvas>
+        <GameMap />
     </div>
 </template>
 
@@ -12,9 +12,6 @@
 div.playground {
     width: 70vw;
     height: 70vh;
-    margin: 2rem auto;
-    background-color: #10d8dc;
-    /*圆角 */
-    border-radius: 10px;
+    margin: 4rem auto;
 }
 </style>
