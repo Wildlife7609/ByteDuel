@@ -1,5 +1,6 @@
 import AcGameObject from "./ACGameObject.js";
 import { Wall } from "./Wall.js";
+import { Snake } from "./Snake.js";
 
 export class GameMap extends AcGameObject {
     constructor(ctx, parent) {
@@ -9,10 +10,15 @@ export class GameMap extends AcGameObject {
         this.L = 0; //绝对像素
 
         this.rows = 15;
-        this.cols = 15;
+        this.cols = 14;
 
         this.inner_walls_count = 20;
         this.walls = [];
+
+        this.snakes = [
+            new Snake({ id: 0, color: "#EC4899", r: this.rows - 2, c: 1 }, this),
+            new Snake({ id: 1, color: "#06B6D4", r: 1, c: this.cols - 2 }, this),
+        ]
     }
 
     check_connected(g, x1, y1, x2, y2) {
@@ -80,23 +86,71 @@ export class GameMap extends AcGameObject {
         return true;
     }
 
+    add_listening_event() {
+        this.ctx.canvas.focus();
+
+        const [snake0, snake1] = this.snakes;
+
+        this.ctx.canvas.addEventListener("keydown", e => {
+            if (e.key === "w") {
+                snake0.set_direction(0);
+            } else if (e.key === "d") {
+                snake0.set_direction(1);
+            } else if (e.key === "s") {
+                snake0.set_direction(2);
+            } else if (e.key === "a") {
+                snake0.set_direction(3);
+            }
+            else if (e.key === "ArrowUp") {
+                snake1.set_direction(0);
+            } else if (e.key === "ArrowRight") {
+                snake1.set_direction(1);
+            } else if (e.key === "ArrowDown") {
+                snake1.set_direction(2);
+            } else if (e.key === "ArrowLeft") {
+                snake1.set_direction(3);
+            }
+        });
+    }
+
     start() {
         this.set_map_size();
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 1000; i++) {
             if (this.create_walls()) break;
         }
     }
+
     set_map_size() {
     }
+
     update_size() {
         this.L = parseInt(Math.min(this.parent.clientWidth / this.cols, this.parent.clientHeight / this.rows));
         this.ctx.canvas.width = this.L * this.cols;
         this.ctx.canvas.height = this.L * this.rows;
     }
+
+    next_step() {
+        for (const snake of this.snakes) {
+            snake.next_step();
+        }
+    }
+
+    check_ready() { // 检查是否已经准备好开始游戏（所有蛇都已静止且方向已确定）
+        for (const snake of this.snakes) {
+            if (snake.status !== "idle") return false;
+            if (snake.direction === -1) return false;
+        }
+        return true;
+    }
+
     update() {
         this.update_size();
+        if (this.check_ready()) {
+            this.next_step()
+        }
         this.render()
     }
+
     render() {
         const color_even = "#AAD751"; // 浅草绿
         const color_odd = "#A2D149"; // 深草绿
