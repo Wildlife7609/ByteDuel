@@ -39,11 +39,8 @@ export class Snake extends AcGameObject {
         const k = this.cells.length;
 
         for (let i = k; i > 0; i--) {
-            this.cells[i] = JSON.parse(JSON.stringify(this.cell[i - 1]));
+            this.cells[i] = JSON.parse(JSON.stringify(this.cells[i - 1]));
         }
-
-        this.cells[0] = this.next_cell;
-        this.next_cell = null;
     }
 
     update_move() {
