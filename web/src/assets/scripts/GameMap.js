@@ -171,17 +171,32 @@ export class GameMap extends AcGameObject {
 
     render() {
         const color_even = "#AAD751"; // 浅草绿
-        const color_odd = "#A2D149"; // 深草绿
-
+        const color_odd = "#A2D149";  // 深草绿
 
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
-                if ((i + j) % 2 === 0) {
-                    this.ctx.fillStyle = color_even;
-                } else {
-                    this.ctx.fillStyle = color_odd;
-                }
+                // 1. 绘制经典棋盘格底色
+                this.ctx.fillStyle = (i + j) % 2 === 0 ? color_even : color_odd;
                 this.ctx.fillRect(j * this.L, i * this.L, this.L, this.L);
+
+                // 2. 随机小草点缀（利用固定坐标哈希，保证位置永远稳定）
+                if ((i * 7 + j * 13) % 9 === 0) {
+                    const cx = (j + 0.5) * this.L;
+                    const cy = (i + 0.5) * this.L;
+
+                    // 画两根可爱的小嫩草苗
+                    this.ctx.strokeStyle = "rgba(74, 120, 30, 0.4)";
+                    this.ctx.lineWidth = this.L * 0.04;
+                    this.ctx.lineCap = "round";
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(cx - this.L * 0.08, cy + this.L * 0.08);
+                    this.ctx.lineTo(cx - this.L * 0.12, cy - this.L * 0.08);
+
+                    this.ctx.moveTo(cx, cy + this.L * 0.1);
+                    this.ctx.lineTo(cx + this.L * 0.08, cy - this.L * 0.1);
+                    this.ctx.stroke();
+                }
             }
         }
     }
