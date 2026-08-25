@@ -132,7 +132,7 @@ export class Snake extends AcGameObject {
         const ctx = this.gamemap.ctx;
 
         const r = L * 0.38; // 蛇身半径 
-        const border = L * 0.045; // 纸片马力欧标志性：白色贴纸切边宽度
+        const border = L * 0.045; //白色贴纸切边宽度
 
         // 折纸蛇的感觉
         ctx.save();
@@ -165,7 +165,7 @@ export class Snake extends AcGameObject {
                 ctx.stroke();
             }
         } else {
-            // 正常状态：绘制白眼仁 + 黑色瞳孔 + 反光
+            // 正常状态：绘制黑色瞳孔 + 反光
             for (let i = 0; i < 2; i++) {
                 const eye_x = (this.cells[0].x + this.eye_dx[this.eye_direction][i] * 0.12) * L;
                 const eye_y = (this.cells[0].y + this.eye_dy[this.eye_direction][i] * 0.12) * L;
