@@ -29,6 +29,12 @@ export class Snake extends AcGameObject {
         this.direction = d;
     }
 
+    check_tail_increasing() { // 检查蛇尾是否增长
+        if (this.step <= 10) return true; // 蛇头每走一步，身体向后移一格，
+        if (this.step % 3 === 1) return true; // 蛇每走3步，蛇尾增长一格
+        return false;
+    }
+
     next_step() { // 计算下一个蛇头的位置
         const d = this.direction;
         this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
@@ -47,14 +53,27 @@ export class Snake extends AcGameObject {
         const dx = this.next_cell.x - this.cells[0].x;
         const dy = this.next_cell.y - this.cells[0].y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < this.eps) {
+        if (distance < this.eps) { // 走到目标位置了
             this.status = "idle";
-            this.cells[0] = this.next_cell;
+            this.cells[0] = this.next_cell; // 添加新的蛇头
             this.next_cell = null;
-        } else {
+
+            if (!this.check_tail_increasing()) { // 如果蛇尾不增长，就删掉蛇尾
+                this.cells.pop();
+            }
+        } else { // 没走到，继续走
             const move_distance = this.speed * this.timedelta / 1000;
             this.cells[0].x += dx * move_distance / distance;
             this.cells[0].y += dy * move_distance / distance;
+
+            if (!this.check_tail_increasing()) {
+                const k = this.cells.length;
+                const tail = this.cells[k - 1], tail_target = this.cells[k - 2];
+                const tail_dx = tail_target.x - tail.x;
+                const tail_dy = tail_target.y - tail.y;
+                tail.x += move_distance * tail_dx / distance;
+                tail.y += move_distance * tail_dy / distance;
+            }
         }
     }
 
