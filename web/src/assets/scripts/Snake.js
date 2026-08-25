@@ -106,12 +106,32 @@ export class Snake extends AcGameObject {
         this.render();
     }
 
+    draw_body(radius, color) {
+        const L = this.gamemap.L;
+        const ctx = this.gamemap.ctx;
+        ctx.fillStyle = color;
+
+        for (const cell of this.cells) {
+            ctx.beginPath();
+            ctx.arc(cell.x * L, cell.y * L, radius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        for (let i = 1; i < this.cells.length; i++) {
+            const a = this.cells[i - 1], b = this.cells[i];
+            if (Math.abs(a.x - b.x) < this.eps && Math.abs(a.y - b.y) < this.eps) continue;
+            if (Math.abs(a.x - b.x) < this.eps) {
+                ctx.fillRect(a.x * L - radius, Math.min(a.y, b.y) * L, 2 * radius, Math.abs(a.y - b.y) * L);
+            } else {
+                ctx.fillRect(Math.min(a.x, b.x) * L, a.y * L - radius, Math.abs(a.x - b.x) * L, 2 * radius);
+            }
+        }
+    }
+
     render() {
         const L = this.gamemap.L;
         const ctx = this.gamemap.ctx;
 
         const r = L * 0.38; // 蛇身半径 
-        const d = r * 2;   // 蛇身厚度
         const border = L * 0.045; // 纸片马力欧标志性：白色贴纸切边宽度
 
         // 折纸蛇的感觉
@@ -120,45 +140,9 @@ export class Snake extends AcGameObject {
         ctx.shadowBlur = 6;
         ctx.shadowOffsetY = 3;
 
-        ctx.fillStyle = this.color;
-        if (this.status === "die") {
-            ctx.fillStyle = "white";
-        }
-
-        ctx.fillStyle = "#FFFFFF";
-        for (const cell of this.cells) {
-            ctx.beginPath();
-            ctx.arc(cell.x * L, cell.y * L, r + border, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-        for (let i = 1; i < this.cells.length; i++) {
-            const a = this.cells[i - 1], b = this.cells[i];
-            if (Math.abs(a.x - b.x) < this.eps && Math.abs(a.y - b.y) < this.eps) continue;
-            if (Math.abs(a.x - b.x) < this.eps) {
-                ctx.fillRect(a.x * L - (r + border), Math.min(a.y, b.y) * L, d + border * 2, Math.abs(a.y - b.y) * L);
-            } else {
-                ctx.fillRect(Math.min(a.x, b.x) * L, a.y * L - (r + border), Math.abs(a.x - b.x) * L, d + border * 2);
-            }
-        }
-
-        ctx.fillStyle = this.color;
-        if (this.status === "die") {
-            ctx.fillStyle = "#CBD5E1";
-        }
-        for (const cell of this.cells) {
-            ctx.beginPath();
-            ctx.arc(cell.x * L, cell.y * L, r, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-        for (let i = 1; i < this.cells.length; i++) {
-            const a = this.cells[i - 1], b = this.cells[i];
-            if (Math.abs(a.x - b.x) < this.eps && Math.abs(a.y - b.y) < this.eps) continue;
-            if (Math.abs(a.x - b.x) < this.eps) {
-                ctx.fillRect(a.x * L - r, Math.min(a.y, b.y) * L, d, Math.abs(a.y - b.y) * L);
-            } else {
-                ctx.fillRect(Math.min(a.x, b.x) * L, a.y * L - r, Math.abs(a.x - b.x) * L, d);
-            }
-        }
+        const color = this.status === "die" ? "#CBD5E1" : this.color;
+        this.draw_body(r + border, "white");
+        this.draw_body(r, color);
 
         // 恢复原始状态（移除阴影）
         ctx.restore();
