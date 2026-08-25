@@ -137,7 +137,6 @@ export class GameMap extends AcGameObject {
         for (const snake of this.snakes) {
             let k = snake.cells.length;
             if (!snake.check_tail_increasing()) { // 蛇尾巴不增长的话，就不用检查蛇尾巴了
-                const tail = snake.cells[k - 1];
                 k--;
             }
             for (let i = 0; i < k; i++) {
