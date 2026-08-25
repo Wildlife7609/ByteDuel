@@ -179,4 +179,99 @@ export class Snake extends AcGameObject {
             }
         }
     }
+    // render() {
+    //     const L = this.gamemap.L;
+    //     const ctx = this.gamemap.ctx;
+
+    //     const r = L * 0.36; // 彩色蛇身半径 
+    //     const d = r * 2;   // 彩色蛇身厚度 
+    //     const border = L * 0.045; // 🌟 纸片马力欧标志性：白色贴纸切边宽度
+
+    //     // 🌟 1. 纸片马力欧专属：薄卡纸硬阴影（清晰干净的纸片投影）
+    //     ctx.save();
+    //     ctx.shadowColor = "rgba(0, 0, 0, 0.22)";
+    //     ctx.shadowBlur = 0; // 👈 纸片不需要模糊，硬投影才有纸板感！
+    //     ctx.shadowOffsetX = 3;
+    //     ctx.shadowOffsetY = 4;
+
+    //     // 🌟 2. 【第一层：纯白卡纸剪边（Die-cut White Border）】
+    //     ctx.fillStyle = "#FFFFFF";
+    //     for (const cell of this.cells) {
+    //         ctx.beginPath();
+    //         ctx.arc(cell.x * L, cell.y * L, r + border, 0, 2 * Math.PI);
+    //         ctx.fill();
+    //     }
+    //     for (let i = 1; i < this.cells.length; i++) {
+    //         const a = this.cells[i - 1], b = this.cells[i];
+    //         if (Math.abs(a.x - b.x) < this.eps && Math.abs(a.y - b.y) < this.eps) continue;
+    //         if (Math.abs(a.x - b.x) < this.eps) {
+    //             ctx.fillRect(a.x * L - (r + border), Math.min(a.y, b.y) * L, d + border * 2, Math.abs(a.y - b.y) * L);
+    //         } else {
+    //             ctx.fillRect(Math.min(a.x, b.x) * L, a.y * L - (r + border), Math.abs(a.x - b.x) * L, d + border * 2);
+    //         }
+    //     }
+    //     ctx.restore(); // 阴影已随白卡纸投射完毕
+
+    //     // 🌟 3. 【第二层：彩色蛇身印花贴纸】
+    //     ctx.fillStyle = this.color;
+    //     if (this.status === "die") {
+    //         ctx.fillStyle = "#CBD5E1";
+    //     }
+    //     for (const cell of this.cells) {
+    //         ctx.beginPath();
+    //         ctx.arc(cell.x * L, cell.y * L, r, 0, 2 * Math.PI);
+    //         ctx.fill();
+    //     }
+    //     for (let i = 1; i < this.cells.length; i++) {
+    //         const a = this.cells[i - 1], b = this.cells[i];
+    //         if (Math.abs(a.x - b.x) < this.eps && Math.abs(a.y - b.y) < this.eps) continue;
+    //         if (Math.abs(a.x - b.x) < this.eps) {
+    //             ctx.fillRect(a.x * L - r, Math.min(a.y, b.y) * L, d, Math.abs(a.y - b.y) * L);
+    //         } else {
+    //             ctx.fillRect(Math.min(a.x, b.x) * L, a.y * L - r, Math.abs(a.x - b.x) * L, d);
+    //         }
+    //     }
+
+    //     // 🌟 4. 纸片马力欧标志性大眼睛
+    //     if (this.status === "die") {
+    //         ctx.strokeStyle = "#334155";
+    //         ctx.lineWidth = L * 0.035;
+    //         ctx.lineCap = "round";
+    //         for (let i = 0; i < 2; i++) {
+    //             const eye_x = (this.cells[0].x + this.eye_dx[this.eye_direction][i] * 0.14) * L;
+    //             const eye_y = (this.cells[0].y + this.eye_dy[this.eye_direction][i] * 0.14) * L;
+    //             const sz = L * 0.045;
+    //             ctx.beginPath();
+    //             ctx.moveTo(eye_x - sz, eye_y - sz);
+    //             ctx.lineTo(eye_x + sz, eye_y + sz);
+    //             ctx.moveTo(eye_x + sz, eye_y - sz);
+    //             ctx.lineTo(eye_x - sz, eye_y + sz);
+    //             ctx.stroke();
+    //         }
+    //     } else {
+    //         for (let i = 0; i < 2; i++) {
+    //             const eye_x = (this.cells[0].x + this.eye_dx[this.eye_direction][i] * 0.14) * L;
+    //             const eye_y = (this.cells[0].y + this.eye_dy[this.eye_direction][i] * 0.14) * L;
+
+    //             // ① 剪纸大眼白
+    //             ctx.fillStyle = "#FFFFFF";
+    //             ctx.beginPath();
+    //             ctx.arc(eye_x, eye_y, L * 0.09, 0, 2 * Math.PI);
+    //             ctx.fill();
+
+    //             // ② 哑光黑眼珠
+    //             ctx.fillStyle = "#0F172A";
+    //             ctx.beginPath();
+    //             ctx.arc(eye_x, eye_y, L * 0.055, 0, 2 * Math.PI);
+    //             ctx.fill();
+
+    //             // ③ 高光小白点
+    //             ctx.fillStyle = "#FFFFFF";
+    //             ctx.beginPath();
+    //             ctx.arc(eye_x - L * 0.018, eye_y - L * 0.018, L * 0.02, 0, 2 * Math.PI);
+    //             ctx.fill();
+    //         }
+    //     }
+    // }
+
 }
