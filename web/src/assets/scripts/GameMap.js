@@ -118,6 +118,7 @@ export class GameMap extends AcGameObject {
         for (let i = 0; i < 1000; i++) {
             if (this.create_walls()) break;
         }
+        this.add_listening_event();
     }
 
     set_map_size() {

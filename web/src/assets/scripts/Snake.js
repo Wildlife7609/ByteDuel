@@ -31,7 +31,7 @@ export class Snake extends AcGameObject {
 
     next_step() { // 计算下一个蛇头的位置
         const d = this.direction;
-        this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d], this.gamemap);
+        this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
         this.direction = -1; // 蛇头走一步之后，不再响应按键，直到下一步计算
         this.status = "move";
         this.step++;
