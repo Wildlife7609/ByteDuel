@@ -20,6 +20,23 @@ export class Snake extends AcGameObject {
         this.step = 0; // 步数
         this.eps = 1e-2; // 精度误差
 
+        this.eye_direction = 0; // 默认朝上
+        if (this.id === 1) {
+            this.eye_direction = 2; // 右上角蛇，眼睛朝下
+        }
+        // 眼睛相对蛇头的偏移量, 0.15
+        this.eye_dx = [
+            [-1, 1], // 眼睛相对蛇头的偏移量
+            [1, 1],
+            [1, -1],
+            [-1, -1]
+        ];
+        this.eye_dy = [
+            [-1, -1],
+            [-1, 1],
+            [1, 1],
+            [1, -1]
+        ];
     }
 
     start() {
@@ -37,6 +54,7 @@ export class Snake extends AcGameObject {
 
     next_step() { // 计算下一个蛇头的位置
         const d = this.direction;
+        this.eye_direction = d; // 蛇头走一步之后，眼睛朝向变成当前方向
         this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
         this.direction = -1; // 蛇头走一步之后，不再响应按键，直到下一步计算
         this.status = "move";
@@ -46,6 +64,10 @@ export class Snake extends AcGameObject {
 
         for (let i = k; i > 0; i--) {
             this.cells[i] = JSON.parse(JSON.stringify(this.cells[i - 1]));
+        }
+
+        if (!this.gamemap.check_valid(this.next_cell)) { // next_cell 位置无效，蛇死亡
+            this.status = "die";
         }
     }
 
@@ -88,10 +110,23 @@ export class Snake extends AcGameObject {
         const L = this.gamemap.L;
         const ctx = this.gamemap.ctx;
 
+        const r = L * 0.38; // 蛇身半径 
+        const d = r * 2;   // 蛇身厚度 
+
+        // 折纸蛇的感觉
+        ctx.save();
+        ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 3;
+
         ctx.fillStyle = this.color;
+        if (this.status === "die") {
+            ctx.fillStyle = "white";
+        }
+
         for (const cell of this.cells) {
             ctx.beginPath();
-            ctx.arc(cell.x * L, cell.y * L, L / 2 * 0.8, 0, 2 * Math.PI);
+            ctx.arc(cell.x * L, cell.y * L, d / 2, 0, 2 * Math.PI);
             ctx.fill();
         }
 
@@ -99,12 +134,51 @@ export class Snake extends AcGameObject {
             const a = this.cells[i - 1], b = this.cells[i];
             if (Math.abs(a.x - b.x) < this.eps && Math.abs(a.y - b.y) < this.eps) continue;
             if (Math.abs(a.x - b.x) < this.eps) {
-                ctx.fillRect(a.x * L - 0.4 * L, Math.min(a.y, b.y) * L, 0.8 * L, Math.abs(a.y - b.y) * L);
+                ctx.fillRect(a.x * L - r, Math.min(a.y, b.y) * L, d, Math.abs(a.y - b.y) * L);
             }
             else {
-                ctx.fillRect(Math.min(a.x, b.x) * L, a.y * L - 0.4 * L, Math.abs(a.x - b.x) * L, 0.8 * L);
+                ctx.fillRect(Math.min(a.x, b.x) * L, a.y * L - r, Math.abs(a.x - b.x) * L, d);
+            }
+        }
+
+        // 恢复原始状态（移除阴影）
+        ctx.restore();
+
+        // 绘制蛇眼
+        if (this.status === "die") {
+            // 绘制死亡晕厥 X X 眼
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = L * 0.025;
+            ctx.lineCap = "round";
+            for (let i = 0; i < 2; i++) {
+                const eye_x = (this.cells[0].x + this.eye_dx[this.eye_direction][i] * 0.12) * L;
+                const eye_y = (this.cells[0].y + this.eye_dy[this.eye_direction][i] * 0.12) * L;
+                const sz = L * 0.04;
+                ctx.beginPath();
+                ctx.moveTo(eye_x - sz, eye_y - sz);
+                ctx.lineTo(eye_x + sz, eye_y + sz);
+                ctx.moveTo(eye_x + sz, eye_y - sz);
+                ctx.lineTo(eye_x - sz, eye_y + sz);
+                ctx.stroke();
+            }
+        } else {
+            // 正常状态：绘制白眼仁 + 黑色瞳孔 + 反光
+            ctx.fillStyle = "black";
+            const eye_r = L * 0.05;
+            for (let i = 0; i < 2; i++) {
+                const eye_x = (this.cells[0].x + this.eye_dx[this.eye_direction][i] * 0.12) * L;
+                const eye_y = (this.cells[0].y + this.eye_dy[this.eye_direction][i] * 0.12) * L;
+                // 黑眼珠
+                ctx.fillStyle = "#1E293B";
+                ctx.beginPath();
+                ctx.arc(eye_x, eye_y, L * 0.065, 0, 2 * Math.PI);
+                ctx.fill();
+                // 眼睛反光高光小白点
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(eye_x - L * 0.02, eye_y - L * 0.02, L * 0.025, 0, 2 * Math.PI);
+                ctx.fill();
             }
         }
     }
-
 }

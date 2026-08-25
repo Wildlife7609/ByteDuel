@@ -130,6 +130,24 @@ export class GameMap extends AcGameObject {
         this.ctx.canvas.height = this.L * this.rows;
     }
 
+    check_valid(cell) { // 检查蛇是否撞墙或撞到自己或撞到对方
+        for (const wall of this.walls) {
+            if (wall.r === cell.r && wall.c === cell.c) return false;
+        }
+        for (const snake of this.snakes) {
+            let k = snake.cells.length;
+            if (!snake.check_tail_increasing()) { // 蛇尾巴不增长的话，就不用检查蛇尾巴了
+                const tail = snake.cells[k - 1];
+                k--;
+            }
+            for (let i = 0; i < k; i++) {
+                if (snake.cells[i].r === cell.r && snake.cells[i].c === cell.c) return false;
+            }
+        }
+        return true;
+
+    }
+
     next_step() {
         for (const snake of this.snakes) {
             snake.next_step();
