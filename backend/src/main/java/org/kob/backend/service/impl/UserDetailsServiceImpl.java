@@ -22,7 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         queryWrapper.eq("username", username);
         User user = userMapper.selectOne(queryWrapper);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new UsernameNotFoundException("用户不存在");
         }
         return new UserDetailsImpl(user);
     }
