@@ -9,3 +9,8 @@
 
 ### VS Code ###
 .vscode/
+
+### Local sensitive configuration ###
+*local.properties
+**/application-local.properties
+

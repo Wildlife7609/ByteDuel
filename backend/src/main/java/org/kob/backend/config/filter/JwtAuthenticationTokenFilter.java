@@ -37,13 +37,15 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             Claims claims = JwtUtil.parseJWT(token);
             userid = claims.getSubject();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            filterChain.doFilter(request, response);
+            return;
         }
 
         User user = userMapper.selectById(Integer.parseInt(userid));
 
         if (user == null) {
-            throw new RuntimeException("用户名未登录");
+            filterChain.doFilter(request, response);
+            return;
         }
 
         UserDetailsImpl loginUser = new UserDetailsImpl(user);

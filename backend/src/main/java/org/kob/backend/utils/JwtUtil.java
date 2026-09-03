@@ -3,6 +3,8 @@ package org.kob.backend.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
+import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -13,8 +15,18 @@ import java.util.UUID;
 
 @Component
 public class JwtUtil {
-    public static final long JWT_TTL = 60 * 60 * 1000L * 24 * 14; // 有效期14天
-    public static final String JWT_KEY = "***REMOVED***";
+    public static long JWT_TTL;
+    public static String JWT_KEY;
+
+    @Value("${jwt.ttl}")
+    public void setJwtTtl(long ttl) {
+        JWT_TTL = ttl;
+    }
+
+    @Value("${jwt.secret}")
+    public void setJwtKey(String key) {
+        JWT_KEY = key;
+    }
 
     public static String getUUID() {
         return UUID.randomUUID().toString().replace("-", "");
