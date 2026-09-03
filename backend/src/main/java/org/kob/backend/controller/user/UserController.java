@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.kob.backend.mapper.UserMapper;
 import org.kob.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +23,7 @@ public class UserController {
     public List<User> getAll() {
         return userMapper.selectList(null);
     }
+
     @GetMapping("/user/{userId}")
     public List<User> getuser(@PathVariable("userId") Integer userId) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -47,7 +47,5 @@ public class UserController {
         userMapper.deleteById(userId);
         return "Delete user successfully";
     }
-
-
 
 }
