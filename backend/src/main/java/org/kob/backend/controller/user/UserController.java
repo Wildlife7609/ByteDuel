@@ -37,7 +37,8 @@ public class UserController {
             @PathVariable("username") String username,
             @PathVariable("password") String password) {
         String encodedPassword = passwordEncoder.encode(password);
-        User user = new User(userId, username, encodedPassword);
+        User user = new User(userId, username, encodedPassword,
+                "https://api.dicebear.com/10.x/bottts/svg?seed=" + username);
         userMapper.insert(user);
         return "Add user successfully";
     }
