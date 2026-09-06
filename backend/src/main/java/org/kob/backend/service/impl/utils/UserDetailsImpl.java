@@ -3,6 +3,7 @@ package org.kob.backend.service.impl.utils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.kob.backend.pojo.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,7 +29,7 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
+    public @NonNull String getUsername() {
         return user.getUsername();
     }
 }

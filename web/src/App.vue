@@ -5,13 +5,13 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import axios from 'axios';
 
 axios.post("http://localhost:8080/user/account/token/", {
-  username: "yxc",
-  password: "pyxc"
+  username: "jli",
+  password: "pli"
 }).then(res => console.log(res.data));
 
 axios.get("http://localhost:8080/user/account/info/", {
   headers: {
-    Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3MWNkNjlkMjIzMGE0ZDM5OTc4OWI4NTA2MTkwZDRjNCIsInN1YiI6IjEiLCJpc3MiOiJzZyIsImlhdCI6MTc4ODY1NDI4NiwiZXhwIjoxNzg5ODYzODg2fQ.RvuMkWBnU0YaIQXrMzWtqw9WOoWabuBiIY9A6BsT9NM"
+    Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3NjM4NDA3MTE2ZGU0MzUyODkxODk4MjM4NjU4OTc3YiIsInN1YiI6IjIiLCJpc3MiOiJzZyIsImlhdCI6MTc4ODY1NDc4OCwiZXhwIjoxNzg5ODY0Mzg4fQ.NvTf2rYokzcucTYy1tbSvjy5IXFHDPe6-nbAHoT6B-s"
   }
 }).then(res => console.log(res.data));
 </script>
