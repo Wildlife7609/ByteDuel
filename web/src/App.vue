@@ -14,6 +14,13 @@ axios.get("http://localhost:8080/user/account/info/", {
     Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3NjM4NDA3MTE2ZGU0MzUyODkxODk4MjM4NjU4OTc3YiIsInN1YiI6IjIiLCJpc3MiOiJzZyIsImlhdCI6MTc4ODY1NDc4OCwiZXhwIjoxNzg5ODY0Mzg4fQ.NvTf2rYokzcucTYy1tbSvjy5IXFHDPe6-nbAHoT6B-s"
   }
 }).then(res => console.log(res.data));
+
+axios.post("http://localhost:8080/user/account/register/", {
+  username: "yxc",
+  password: "pyxc",
+  confirmedPassword: "pyxc"
+}).then(res => console.log(res.data));
+
 </script>
 
 <template>
