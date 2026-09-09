@@ -23,12 +23,8 @@ export const useUserStore = defineStore('user', () => {
         return res.data;
     }
 
-    const get_user_info = async () => {
-        const res = await axios.get("http://localhost:8080/user/account/info/", {
-            headers: {
-                Authorization: "Bearer " + token.value,
-            }
-        });
+    const getInfo = async () => {
+        const res = await axios.get("http://localhost:8080/user/account/info/");
         if (res.data.error_message === "success") {
             id.value = res.data.id;
             username.value = res.data.username;
@@ -54,7 +50,7 @@ export const useUserStore = defineStore('user', () => {
         token,
         is_login,
         login,
-        get_user_info,
+        getInfo,
         logout
     }
 })

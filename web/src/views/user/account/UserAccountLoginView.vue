@@ -18,7 +18,7 @@ const login = async () => {
             password: password.value
         });
         if (res.error_message === "success") {
-            await userStore.get_user_info();
+            await userStore.getInfo();
             router.push({ name: "home" });
         } else {
             error_message.value = res.error_message;
