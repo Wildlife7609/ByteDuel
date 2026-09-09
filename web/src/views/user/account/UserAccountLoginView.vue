@@ -13,16 +13,12 @@ let error_message = ref("");
 const login = async () => {
     error_message.value = "";
     try {
-        const res = await userStore.login({
+        await userStore.login({
             username: username.value,
             password: password.value
         });
-        if (res.error_message === "success") {
-            await userStore.getInfo();
-            router.push({ name: "home" });
-        } else {
-            error_message.value = res.error_message;
-        }
+        await userStore.getInfo();
+        router.push({ name: "home" });
     } catch (error) {
         if (error.response && error.response.status === 403) {
             error_message.value = "用户名或密码错误";

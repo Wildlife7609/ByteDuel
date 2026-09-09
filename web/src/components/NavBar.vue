@@ -1,7 +1,12 @@
 <script setup>
 import { useUserStore } from '@/stores/user';
-
+import router from '@/router';
 const userStore = useUserStore();
+
+const logout = () => {
+    userStore.logout();
+    router.push({ name: "useraccountlogin" });
+}
 </script>
 
 <template>
@@ -43,7 +48,7 @@ const userStore = useUserStore();
                         <ul class="dropdown-menu">
                             <li><router-link class="dropdown-item" active-class="active"
                                     :to="{ name: 'userbots' }">我的bot</router-link></li>
-                            <li><a class="dropdown-item" href="#" @click.prevent="userStore.logout">退出登录</a></li>
+                            <li><a class="dropdown-item" href="#" @click.prevent="logout">退出登录</a></li>
                         </ul>
                     </li>
                 </ul>

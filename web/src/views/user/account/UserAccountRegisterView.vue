@@ -23,13 +23,8 @@ const register = async () => {
             error_message.value = res.data.error_message;
         }
     } catch (error) {
-        if (error.response) {
-            error_message.value = error.response.data.error_message;
-        } else {
-            error_message.value = "服务器连接失败";
-        }
+        error_message.value = "服务器连接失败";
     }
-
 }
 
 </script>
