@@ -1,4 +1,7 @@
 <script setup>
+import { useUserStore } from '@/stores/user';
+
+const userStore = useUserStore();
 </script>
 
 <template>
@@ -21,16 +24,26 @@
                         <router-link class="nav-link" active-class="active" :to="{ name: 'ranklist' }">排行榜</router-link>
                     </li>
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav" v-if="!userStore.is_login">
+                    <li class="nav-item">
+                        <router-link class="nav-link" active-class="active"
+                            :to="{ name: 'useraccountlogin' }">登录</router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link class="nav-link" active-class="active"
+                            :to="{ name: 'useraccountregister' }">注册</router-link>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" v-else>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
-                            JingLi
+                            {{ userStore.username }}
                         </a>
                         <ul class="dropdown-menu">
                             <li><router-link class="dropdown-item" active-class="active"
                                     :to="{ name: 'userbots' }">我的bot</router-link></li>
-                            <li><a class="dropdown-item" href="#">退出登录</a></li>
+                            <li><a class="dropdown-item" href="#" @click.prevent="userStore.logout">退出登录</a></li>
                         </ul>
                     </li>
                 </ul>
