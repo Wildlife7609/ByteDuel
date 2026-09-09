@@ -1,5 +1,36 @@
 <script setup>
 import ContentField from '@/components/ContentField.vue';
+import { ref } from 'vue';
+import router from '@/router';
+import axios from 'axios';
+
+let username = ref("");
+let password = ref("");
+let confirmedPassword = ref("");
+let error_message = ref("");
+
+const register = async () => {
+    error_message.value = "";
+    try {
+        const res = await axios.post("http://localhost:8080/user/account/register/", {
+            username: username.value,
+            password: password.value,
+            confirmedPassword: confirmedPassword.value
+        });
+        if (res.data.error_message === "success") {
+            router.push({ name: "useraccountlogin" });
+        } else {
+            error_message.value = res.data.error_message;
+        }
+    } catch (error) {
+        if (error.response) {
+            error_message.value = error.response.data.error_message;
+        } else {
+            error_message.value = "服务器连接失败";
+        }
+    }
+
+}
 
 </script>
 
@@ -7,7 +38,7 @@ import ContentField from '@/components/ContentField.vue';
     <ContentField>
         <div class="row justify-content-md-center">
             <div class="col-3">
-                <form>
+                <form @submit.prevent="register">
                     <div class="mb-3">
                         <label for="username" class="form-label">用户名</label>
                         <input v-model="username" type="text" class="form-control" id="username" placeholder="请输入用户名">
@@ -18,9 +49,9 @@ import ContentField from '@/components/ContentField.vue';
                             placeholder="请输入密码">
                     </div>
                     <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">确认密码</label>
-                        <input v-model="confirmPassword" type="password" class="form-control" id="confirmPassword"
-                            placeholder="请输入确认密码">
+                        <label for="confirmedPassword" class="form-label">确认密码</label>
+                        <input v-model="confirmedPassword" type="password" class="form-control" id="confirmedPassword"
+                            placeholder="请再次输入密码">
                     </div>
                     <div class="error-message">
                         {{ error_message }}
