@@ -8,6 +8,7 @@ export const useUserStore = defineStore('user', () => {
     const photo = ref('');
     const token = ref(localStorage.getItem("jwt_token") || '');
     const is_login = ref(false);
+    const pulling_info = ref(localStorage.getItem("jwt_token") !== null);
 
     const login = async (data) => {
         const res = await axios.post("/user/account/token/", {
@@ -24,14 +25,18 @@ export const useUserStore = defineStore('user', () => {
     }
 
     const getInfo = async () => {
-        const res = await axios.get("/user/account/info/");
-        if (res.data.error_message === "success") {
-            id.value = res.data.id;
-            username.value = res.data.username;
-            photo.value = res.data.photo;
-            is_login.value = true;
+        try {
+            const res = await axios.get("/user/account/info/");
+            if (res.data.error_message === "success") {
+                id.value = res.data.id;
+                username.value = res.data.username;
+                photo.value = res.data.photo;
+                is_login.value = true;
+            }
+            return res.data;
+        } finally {
+            pulling_info.value = false;
         }
-        return res.data;
     }
 
     const logout = () => {
@@ -41,6 +46,7 @@ export const useUserStore = defineStore('user', () => {
         token.value = '';
         is_login.value = false;
         localStorage.removeItem("jwt_token");
+        pulling_info.value = false;
     }
 
     return {
@@ -49,6 +55,7 @@ export const useUserStore = defineStore('user', () => {
         photo,
         token,
         is_login,
+        pulling_info,
         login,
         getInfo,
         logout

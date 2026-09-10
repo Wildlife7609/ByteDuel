@@ -29,17 +29,7 @@ const logout = () => {
                         <router-link class="nav-link" active-class="active" :to="{ name: 'ranklist' }">排行榜</router-link>
                     </li>
                 </ul>
-                <ul class="navbar-nav" v-if="!userStore.is_login">
-                    <li class="nav-item">
-                        <router-link class="nav-link" active-class="active"
-                            :to="{ name: 'useraccountlogin' }">登录</router-link>
-                    </li>
-                    <li class="nav-item">
-                        <router-link class="nav-link" active-class="active"
-                            :to="{ name: 'useraccountregister' }">注册</router-link>
-                    </li>
-                </ul>
-                <ul class="navbar-nav" v-else>
+                <ul class="navbar-nav" v-if="userStore.is_login">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
@@ -52,6 +42,17 @@ const logout = () => {
                         </ul>
                     </li>
                 </ul>
+                <ul class="navbar-nav" v-else-if="!userStore.pulling_info">
+                    <li class="nav-item">
+                        <router-link class="nav-link" active-class="active"
+                            :to="{ name: 'useraccountlogin' }">登录</router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link class="nav-link" active-class="active"
+                            :to="{ name: 'useraccountregister' }">注册</router-link>
+                    </li>
+                </ul>
+
 
             </div>
         </div>
