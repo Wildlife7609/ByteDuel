@@ -92,6 +92,9 @@ export class GameMap extends AcGameObject {
         const [snake0, snake1] = this.snakes;
 
         this.ctx.canvas.addEventListener("keydown", e => {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+                e.preventDefault();
+            }
             if (e.key === "w") {
                 snake0.set_direction(0);
             } else if (e.key === "d") {
