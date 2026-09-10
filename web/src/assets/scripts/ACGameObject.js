@@ -43,4 +43,4 @@ const step = (timestamp) => {
     requestAnimationFrame(step);
 }
 
-requestAnimationFrame(step); 
+requestAnimationFrame(step);

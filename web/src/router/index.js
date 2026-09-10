@@ -89,6 +89,10 @@ router.beforeEach(async (to, from) => {
   if (!userStore.is_login && to.meta.requestAuth) {
     return { name: 'useraccountlogin' }
   }
+
+  if (userStore.is_login && (to.name === 'useraccountlogin' || to.name === 'useraccountregister')) {
+    return { name: 'home' }
+  }
 })
 
 export default router
