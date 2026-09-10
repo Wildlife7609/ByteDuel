@@ -121,6 +121,15 @@ export class GameMap extends AcGameObject {
         this.add_listening_event();
     }
 
+    on_destroy() {
+        for (let wall of this.walls) {
+            wall.destroy();
+        }
+        for (let snake of this.snakes) {
+            snake.destroy();
+        }
+    }
+
     set_map_size() {
     }
 
