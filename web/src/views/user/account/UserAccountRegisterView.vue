@@ -12,7 +12,7 @@ let error_message = ref("");
 const register = async () => {
     error_message.value = "";
     try {
-        const res = await axios.post("http://localhost:8080/user/account/register/", {
+        const res = await axios.post("/user/account/register/", {
             username: username.value,
             password: password.value,
             confirmedPassword: confirmedPassword.value

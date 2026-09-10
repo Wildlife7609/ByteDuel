@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', () => {
     const is_login = ref(false);
 
     const login = async (data) => {
-        const res = await axios.post("http://localhost:8080/user/account/token/", {
+        const res = await axios.post("/user/account/token/", {
             username: data.username,
             password: data.password,
         })
@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     const getInfo = async () => {
-        const res = await axios.get("http://localhost:8080/user/account/info/");
+        const res = await axios.get("/user/account/info/");
         if (res.data.error_message === "success") {
             id.value = res.data.id;
             username.value = res.data.username;

@@ -15,6 +15,8 @@ axios.interceptors.request.use(config => {
     throw error;
 });
 
+axios.defaults.baseURL = "http://localhost:8080";
+
 const app = createApp(App)
 
 app.use(createPinia())
