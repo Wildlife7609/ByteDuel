@@ -22,26 +22,17 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public Map<String, String> register(String username, String password, String confirmedPassword) {
         Map<String, String> map = new HashMap<>();
-        if (username == null) {
+        if (username == null || username.isBlank()) {
             map.put("error_message", "用户名不能为空");
             return map;
         }
-        if (password == null || confirmedPassword == null) {
+        if (password == null || confirmedPassword == null || password.isEmpty() || confirmedPassword.isEmpty()) {
             map.put("error_message", "密码不能为空");
             return map;
         }
         username = username.trim();
-        if (username.isEmpty()) {
-            map.put("error_message", "用户名不能为空");
-            return map;
-        }
         if (username.length() > 100) {
             map.put("error_message", "用户名长度不能大于100");
-            return map;
-        }
-
-        if (password.isEmpty() || confirmedPassword.isEmpty()) {
-            map.put("error_message", "密码不能为空");
             return map;
         }
         if (password.length() > 100 || confirmedPassword.length() > 100) {
