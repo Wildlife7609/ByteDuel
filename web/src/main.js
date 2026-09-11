@@ -17,6 +17,13 @@ axios.interceptors.request.use(config => {
 
 axios.defaults.baseURL = "http://localhost:8080";
 
+// 消除 Bootstrap Modal 关闭时 Chrome 报 Blocked aria-hidden 警告
+document.addEventListener('hide.bs.modal', () => {
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
+});
+
 const app = createApp(App)
 
 app.use(createPinia())
