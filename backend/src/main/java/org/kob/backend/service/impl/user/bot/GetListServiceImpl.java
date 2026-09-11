@@ -1,7 +1,6 @@
 package org.kob.backend.service.impl.user.bot;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.intellij.lang.annotations.JdkConstants.AdjustableOrientation;
 import org.kob.backend.mapper.BotMapper;
 import org.kob.backend.pojo.Bot;
 import org.kob.backend.pojo.User;
