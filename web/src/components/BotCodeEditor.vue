@@ -52,7 +52,12 @@ const clearCode = () => {
 <template>
     <div class="mb-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <label class="form-label mb-0 fw-semibold">Bot 代码</label>
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 fw-semibold">Bot 代码</label>
+                <span class="small" :class="(content?.length || 0) > 10000 ? 'text-danger fw-bold' : 'text-muted'">
+                    {{ content?.length || 0 }} / 10000
+                </span>
+            </div>
             <div class="d-flex gap-2 align-items-center">
                 <!-- 语言切换 -->
                 <select v-model="editorLang" class="form-select form-select-sm" style="width: 105px;">

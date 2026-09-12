@@ -127,14 +127,28 @@ const remove_bot = async (bot) => {
                 <div class="modal-body">
                     <form>
                         <div class="mb-3">
-                            <label for="bot-title" class="form-label">Bot名称</label>
-                            <input v-model="botForm.title" type="text" class="form-control" id="bot-title"
-                                placeholder="请输入Bot名称" maxlength="100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="bot-title" class="form-label mb-0">Bot名称</label>
+                                <span class="small"
+                                    :class="botForm.title.length > 100 ? 'text-danger fw-bold' : 'text-muted'">
+                                    {{ botForm.title.length }} / 100
+                                </span>
+                            </div>
+                            <input v-model="botForm.title" type="text" class="form-control"
+                                :class="{ 'is-invalid': botForm.title.length > 100 }" id="bot-title"
+                                placeholder="请输入Bot名称">
                         </div>
                         <div class="mb-3">
-                            <label for="bot-description" class="form-label">Bot描述</label>
-                            <textarea v-model="botForm.description" class="form-control" rows="4" id="bot-description"
-                                placeholder="请输入Bot描述（选填，最多300字）" maxlength="300"></textarea>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="bot-description" class="form-label mb-0">Bot描述</label>
+                                <span class="small"
+                                    :class="(botForm.description.length) > 300 ? 'text-danger fw-bold' : 'text-muted'">
+                                    {{ botForm.description.length }} / 300
+                                </span>
+                            </div>
+                            <textarea v-model="botForm.description" class="form-control" rows="4"
+                                :class="{ 'is-invalid': botForm.description.length > 300 }" id="bot-description"
+                                placeholder="请输入Bot描述（选填）"></textarea>
                         </div>
                         <BotCodeEditor v-model="botForm.content" />
                     </form>
