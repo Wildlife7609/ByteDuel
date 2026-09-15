@@ -69,4 +69,13 @@ public class JwtUtil {
                 .parseSignedClaims(jwt)
                 .getPayload();
     }
+
+    public static Integer getUserId(String token) {
+        Integer userId = -1;
+        try {
+            userId = Integer.parseInt(parseJWT(token).getSubject());
+        } catch (Exception e) {
+        }
+        return userId;
+    }
 }

@@ -36,7 +36,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/account/token/", "/user/account/register/", "/error").permitAll()
+                        .requestMatchers("/user/account/token/", "/user/account/register/", "/error", "/websocket/**")
+                        .permitAll()
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
                         .anyRequest().authenticated());
 

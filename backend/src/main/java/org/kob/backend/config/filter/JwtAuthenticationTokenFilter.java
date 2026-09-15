@@ -4,7 +4,6 @@ import org.kob.backend.mapper.UserMapper;
 import org.kob.backend.pojo.User;
 import org.kob.backend.service.impl.utils.UserDetailsImpl;
 import org.kob.backend.utils.JwtUtil;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,18 +30,13 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         }
 
         token = token.substring(7);
-
-        String userid;
-        try {
-            Claims claims = JwtUtil.parseJWT(token);
-            userid = claims.getSubject();
-        } catch (Exception e) {
+        Integer userId = JwtUtil.getUserId(token);
+        if (userId == -1) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        User user = userMapper.selectById(Integer.parseInt(userid));
-
+        User user = userMapper.selectById(userId);
         if (user == null) {
             filterChain.doFilter(request, response);
             return;
