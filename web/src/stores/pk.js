@@ -4,8 +4,8 @@ import { defineStore } from 'pinia'
 export const usePkStore = defineStore('pk', () => {
     const socket = ref(null);
     const status = ref('matching'); // 'matching' or 'playing'
-    const opponent_username = ref('');
-    const opponent_photo = ref('');
+    const opponent_username = ref('???');
+    const opponent_photo = ref('https://api.dicebear.com/10.x/bottts/svg?seed=opponent_photo');
     const gamemap = ref(null);
 
     const updateSocket = (newSocket) => {

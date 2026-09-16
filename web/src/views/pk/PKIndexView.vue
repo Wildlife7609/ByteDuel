@@ -3,6 +3,7 @@ import PlayGround from '@/components/PlayGround.vue'
 import { usePkStore } from '@/stores/pk';
 import { useUserStore } from '@/stores/user';
 import { onMounted, onUnmounted } from 'vue';
+import MatchGround from '@/components/MatchGround.vue';
 
 const pkStore = usePkStore();
 const userStore = useUserStore();
@@ -30,7 +31,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <PlayGround />
+    <PlayGround v-if="pkStore.status === 'playing'" />
+    <MatchGround v-if="pkStore.status === 'matching'" />
 </template>
 
 <style scoped></style>
