@@ -19,14 +19,13 @@ const click_match_btn = () => {
     if (matchBtnText.value === "开始匹配") {
         matchBtnText.value = "取消";
         // 向后端发送开始匹配消息（带上选中的 bot_id）
-        pkStore.socket.send(JSON.stringify({
+        pkStore.socket?.send(JSON.stringify({
             event: "start-matching",
-            bot_id: select_bot.value,
         }));
     } else {
         matchBtnText.value = "开始匹配";
         // 向后端发送取消匹配消息
-        pkStore.socket.send(JSON.stringify({
+        pkStore.socket?.send(JSON.stringify({
             event: "stop-matching",
         }));
     }
@@ -48,7 +47,7 @@ const click_match_btn = () => {
             <div class="col-4 text-center middle-panel">
                 <div class="vs-badge">VS</div>
                 <div class="user-select-bot my-4">
-                    <select class="form-select select-bot">
+                    <select class="form-select select-bot" v-model="pkStore.selectedBotId">
                         <option value="-1" selected>亲自出战</option>
                         <option v-for="bot in bots" :key="bot.id" :value="bot.id">
                             {{ bot.title }}
@@ -62,9 +61,9 @@ const click_match_btn = () => {
             <!-- 右侧：对手 -->
             <div class="col-4 text-center">
                 <div class="user-photo">
-                    <img :src="pkStore.opponent_photo" alt="">
+                    <img :src="pkStore.opponentPhoto" alt="">
                 </div>
-                <div class="user-username">{{ pkStore.opponent_username }}</div>
+                <div class="user-username">{{ pkStore.opponentUsername }}</div>
             </div>
         </div>
     </div>

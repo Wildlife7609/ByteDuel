@@ -1,10 +1,19 @@
 package org.kob.backend.consumer;
 
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.kob.backend.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+
 import org.kob.backend.pojo.User;
 import org.kob.backend.pojo.Player;
 import org.kob.backend.utils.JwtUtil;
@@ -15,6 +24,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private UserMapper userMapper;
     @Autowired
     private PlayerManager playerManager;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    final private static Set<Player> matchPool = ConcurrentHashMap.newKeySet();
 
     @Override // 相当于 @OnOpen（建立连接）
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -37,9 +50,55 @@ public class WebSocketHandler extends TextWebSocketHandler {
         System.out.println("玩家连接成功: " + user.getUsername());
     }
 
+    private void startMatching(Integer userId) {
+        System.out.println("开始匹配");
+        Player player = playerManager.getPlayer(userId);
+        if (player == null)
+            return;
+        matchPool.add(player);
+
+        while (matchPool.size() >= 2) {
+            Iterator<Player> it = matchPool.iterator();
+            Player a = it.next();
+            Player b = it.next();
+
+            matchPool.remove(a);
+            matchPool.remove(b);
+
+            ObjectNode respA = objectMapper.createObjectNode();
+            respA.put("event", "match-success");
+            respA.put("opponent_username", b.getUser().getUsername());
+            respA.put("opponent_photo", b.getUser().getPhoto());
+
+            ObjectNode respB = objectMapper.createObjectNode();
+            respB.put("event", "match-success");
+            respB.put("opponent_username", a.getUser().getUsername());
+            respB.put("opponent_photo", a.getUser().getPhoto());
+
+            playerManager.sendMessage(a, respA.toString());
+            playerManager.sendMessage(b, respB.toString());
+        }
+    }
+
+    private void stopMatching(Integer userId) {
+        System.out.println("取消匹配");
+        Player player = playerManager.getPlayer(userId);
+        if (player == null)
+            return;
+        matchPool.remove(player);
+    }
+
     @Override // 相当于 @OnMessage（收到消息）
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        System.out.println("收到消息: " + message.getPayload());
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        System.out.println("收到消息");
+        JsonNode data = objectMapper.readTree(message.getPayload());// 通常把message 当作路由
+        String event = data.get("event").asString();
+        Integer userId = (Integer) session.getAttributes().get("userId");
+        if ("start-matching".equals(event)) {
+            startMatching(userId);
+        } else if ("stop-matching".equals(event)) {
+            stopMatching(userId);
+        }
     }
 
     @Override // 相当于 @OnClose（断开连接）
@@ -47,6 +106,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Integer userId = (Integer) session.getAttributes().get("userId");
         playerManager.removePlayer(userId);
         System.out.println("玩家断开连接: " + userId);
+        stopMatching(userId);
     }
 
     @Override // 相当于 @OnError（通信异常）

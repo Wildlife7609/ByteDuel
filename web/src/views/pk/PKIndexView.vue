@@ -15,9 +15,16 @@ onMounted(() => {
     socket.onopen = () => {
         console.log("连接成功");
     }
+    pkStore.updateSocket(socket);
     socket.onmessage = (msg) => {
         const data = JSON.parse(msg.data);
-        console.log("收到消息: ", data);
+        if (data.event === "match-success") {
+            console.log("匹配成功");
+            pkStore.opponentUsername = data.opponent_username;
+            pkStore.opponentPhoto = data.opponent_photo;
+            pkStore.status = "playing";
+
+        }
     }
     socket.onclose = () => {
         console.log("连接关闭");

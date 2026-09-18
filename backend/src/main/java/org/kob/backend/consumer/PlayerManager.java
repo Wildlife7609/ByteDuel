@@ -28,8 +28,7 @@ public class PlayerManager {
         return players.get(userId);
     }
 
-    public void sendMessage(Integer userId, String message) {
-        Player player = getPlayer(userId);
+    public void sendMessage(Player player, String message) {
         if (player != null && player.getSession() != null && player.getSession().isOpen()) {
             try {
                 synchronized (player.getSession()) {
