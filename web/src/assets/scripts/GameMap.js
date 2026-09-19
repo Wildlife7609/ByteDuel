@@ -3,10 +3,11 @@ import { Wall } from "./Wall.js";
 import { Snake } from "./Snake.js";
 
 export class GameMap extends AcGameObject {
-    constructor(ctx, parent) {
+    constructor(ctx, parent, pkStoreGameMap) {
         super();
         this.ctx = ctx;
         this.parent = parent;
+        this.pkStoreGameMap = pkStoreGameMap;
         this.L = 0; //绝对像素
 
         this.rows = 15;
@@ -21,61 +22,8 @@ export class GameMap extends AcGameObject {
         ]
     }
 
-    check_connected(g, x1, y1, x2, y2) {
-        if (x1 == x2 && y1 == y2) return true;
-        g[x1][y1] = true;
-        let offset = [0, 1, 0, -1, 0];
-        for (let i = 0; i < 4; i++) {
-            let nx = x1 + offset[i];
-            let ny = y1 + offset[i + 1];
-            if (nx >= 0 && nx < this.rows && ny >= 0 && ny < this.cols && !g[nx][ny]) {
-                if (this.check_connected(g, nx, ny, x2, y2)) return true;
-            }
-        }
-        return false;
-    }
-
     create_walls() {
-        const g = [];
-        for (let r = 0; r < this.rows; r++) {
-            g[r] = [];
-            for (let c = 0; c < this.cols; c++) {
-                g[r][c] = false;
-            }
-        }
-
-        for (let r = 0; r < this.rows; r++) {
-            for (let c = 0; c < this.cols; c++) {
-                if (r === 0 || r === this.rows - 1 || c === 0 || c === this.cols - 1) {
-                    g[r][c] = true;
-                }
-            }
-        }
-
-        // 创建随机障碍物（中心对称）
-        for (let i = 0; i < this.inner_walls_count / 2; i++) {
-            for (let j = 0; j < 1000; j++) { // 尝试最多 1000 次避免极端死循环
-                let r = parseInt(Math.random() * this.rows);
-                let c = parseInt(Math.random() * this.cols);
-
-                // 1. 如果自身或对称点已经有墙，跳过重新随机
-                if (g[r][c] || g[this.rows - 1 - r][this.cols - 1 - c]) continue;
-
-                // 2. 排除左下角和右上角两条蛇的出生点
-                if ((r === this.rows - 2 && c === 1) || (r === 1 && c === this.cols - 2)) continue;
-
-                // 3. 找到合法空位，成对放置障碍物并退出当前循环
-                g[r][c] = g[this.rows - 1 - r][this.cols - 1 - c] = true;
-                break;
-            }
-        }
-
-        const copy_g = JSON.parse(JSON.stringify(g));
-        if (!this.check_connected(copy_g, this.rows - 2, 1, 1, this.cols - 2)) {
-            return false;
-        }
-
-
+        const g = this.pkStoreGameMap;
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 if (g[r][c]) {
@@ -83,7 +31,6 @@ export class GameMap extends AcGameObject {
                 }
             }
         }
-        return true;
     }
 
     add_listening_event() {
@@ -117,10 +64,7 @@ export class GameMap extends AcGameObject {
     }
 
     start() {
-        this.set_map_size();
-        for (let i = 0; i < 1000; i++) {
-            if (this.create_walls()) break;
-        }
+        this.create_walls();
         this.add_listening_event();
     }
 
@@ -131,9 +75,6 @@ export class GameMap extends AcGameObject {
         for (let snake of this.snakes) {
             snake.destroy();
         }
-    }
-
-    set_map_size() {
     }
 
     update_size() {

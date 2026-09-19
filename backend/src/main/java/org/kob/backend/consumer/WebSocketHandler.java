@@ -45,7 +45,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             return;
         }
         session.getAttributes().put("userId", userId);
-        Player player = new Player(user, session);
+        Player player = new Player(user, session, null);
         playerManager.addPlayer(player);
         System.out.println("玩家连接成功: " + user.getUsername());
     }
@@ -65,15 +65,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
             matchPool.remove(a);
             matchPool.remove(b);
 
+            Game game = new Game(15, 14, 20);
+            game.createMap();
+            a.setGame(game);
+            b.setGame(game);
+
             ObjectNode respA = objectMapper.createObjectNode();
             respA.put("event", "match-success");
             respA.put("opponent_username", b.getUser().getUsername());
             respA.put("opponent_photo", b.getUser().getPhoto());
+            respA.putPOJO("map", game.getG());
 
             ObjectNode respB = objectMapper.createObjectNode();
             respB.put("event", "match-success");
             respB.put("opponent_username", a.getUser().getUsername());
             respB.put("opponent_photo", a.getUser().getPhoto());
+            respB.putPOJO("map", game.getG());
 
             playerManager.sendMessage(a, respA.toString());
             playerManager.sendMessage(b, respB.toString());
@@ -104,9 +111,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Override // 相当于 @OnClose（断开连接）
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Integer userId = (Integer) session.getAttributes().get("userId");
+        stopMatching(userId);
         playerManager.removePlayer(userId);
         System.out.println("玩家断开连接: " + userId);
-        stopMatching(userId);
+
     }
 
     @Override // 相当于 @OnError（通信异常）

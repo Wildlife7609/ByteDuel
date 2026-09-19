@@ -8,9 +8,21 @@ export const usePkStore = defineStore('pk', () => {
     const opponentUsername = ref('???');
     const opponentPhoto = ref('https://api.dicebear.com/10.x/bottts/svg?seed=opponent_photo');
     const opponentSelectedBotId = ref("-1");
+    const gameMap = ref([]);
 
     const updateSocket = (newSocket) => {
         socket.value = newSocket;
+    }
+
+    const initOpponent = () => {
+        opponentUsername.value = '???';
+        opponentPhoto.value = 'https://api.dicebear.com/10.x/bottts/svg?seed=opponent_photo';
+        opponentSelectedBotId.value = "-1";
+        gameMap.value = [];
+    }
+
+    const updateGameMap = (map) => {
+        gameMap.value = map;
     }
 
     const updateOpponent = (username, photo) => {
@@ -29,8 +41,11 @@ export const usePkStore = defineStore('pk', () => {
         opponentUsername,
         opponentPhoto,
         opponentSelectedBotId,
+        gameMap,
         updateSocket,
         updateOpponent,
         updateStatus,
+        initOpponent,
+        updateGameMap,
     }
 })

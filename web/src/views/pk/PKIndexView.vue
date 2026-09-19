@@ -20,9 +20,11 @@ onMounted(() => {
         const data = JSON.parse(msg.data);
         if (data.event === "match-success") {
             console.log("匹配成功");
-            pkStore.opponentUsername = data.opponent_username;
-            pkStore.opponentPhoto = data.opponent_photo;
-            pkStore.status = "playing";
+            pkStore.updateOpponent(data.opponent_username, data.opponent_photo);
+            setTimeout(() => {
+                pkStore.updateStatus("playing");
+            }, 2000)
+            pkStore.updateGameMap(data.map);
 
         }
     }
@@ -33,6 +35,8 @@ onMounted(() => {
 
 onUnmounted(() => {
     socket.close();
+    pkStore.updateStatus("matching");
+    pkStore.initOpponent();
 })
 
 </script>
