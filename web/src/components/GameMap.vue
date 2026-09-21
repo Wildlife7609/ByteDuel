@@ -8,7 +8,7 @@ let parent = ref(null);
 let canvas = ref(null);
 let gamemap = null;
 onMounted(() => {
-    gamemap = new GameMap(canvas.value.getContext("2d"), parent.value, pkStore.gameMap);
+    gamemap = new GameMap(canvas.value.getContext("2d"), parent.value, pkStore.gameObject);
 })
 onUnmounted(() => {
     gamemap.destroy();

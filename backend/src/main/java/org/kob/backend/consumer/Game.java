@@ -1,19 +1,24 @@
 package org.kob.backend.consumer;
 
 import java.util.Random;
+import org.kob.backend.pojo.Player;
 
 public class Game {
-    final private Integer rows;
-    final private Integer cols;
-    final private Integer inner_walls_count;
-    final int[][] g;
-    final private static int[] offset = { 0, 1, 0, -1, 0 };
+    public final Integer rows;
+    public final Integer cols;
+    private final Integer inner_walls_count;
+    private final int[][] g;
+    private final static int[] offset = { 0, 1, 0, -1, 0 };
 
-    public Game(Integer rows, Integer cols, Integer inner_walls_count) {
+    private final Player p1, p2;
+
+    public Game(Integer rows, Integer cols, Integer inner_walls_count, Player p1, Player p2) {
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_count = inner_walls_count;
         this.g = new int[rows][cols];
+        this.p1 = p1;
+        this.p2 = p2;
         createMap();
     }
 

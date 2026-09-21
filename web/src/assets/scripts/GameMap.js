@@ -3,11 +3,11 @@ import { Wall } from "./Wall.js";
 import { Snake } from "./Snake.js";
 
 export class GameMap extends AcGameObject {
-    constructor(ctx, parent, pkStoreGameMap) {
+    constructor(ctx, parent, gameObject) {
         super();
         this.ctx = ctx;
         this.parent = parent;
-        this.pkStoreGameMap = pkStoreGameMap;
+        this.gameObject = gameObject;
         this.L = 0; //绝对像素
 
         this.rows = 15;
@@ -17,13 +17,15 @@ export class GameMap extends AcGameObject {
         this.walls = [];
 
         this.snakes = [
-            new Snake({ id: 0, color: "#EC4899", r: this.rows - 2, c: 1 }, this),
-            new Snake({ id: 1, color: "#06B6D4", r: 1, c: this.cols - 2 }, this),
+            new Snake({ id: 0, color: "#EC4899", r: gameObject.a_sx, c: gameObject.a_sy }, this),
+            new Snake({ id: 1, color: "#06B6D4", r: gameObject.b_sx, c: gameObject.b_sy }, this),
         ]
     }
 
     create_walls() {
-        const g = this.pkStoreGameMap;
+        const g = this.gameObject?.map;
+        if (!g) return;
+
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 if (g[r][c]) {

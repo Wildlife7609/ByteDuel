@@ -24,7 +24,7 @@ onMounted(() => {
             setTimeout(() => {
                 pkStore.updateStatus("playing");
             }, 2000)
-            pkStore.updateGameMap(data.map);
+            pkStore.updateGameObject(data.game);
 
         }
     }
