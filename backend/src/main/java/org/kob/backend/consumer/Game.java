@@ -140,9 +140,9 @@ public class Game extends Thread {
             throw new RuntimeException(e);
         }
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 25; i++) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(200);
                 lock.lock();
                 try {
                     if (nextStepP1 != null && nextStepP2 != null) {
