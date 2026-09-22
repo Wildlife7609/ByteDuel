@@ -23,10 +23,24 @@ onMounted(() => {
             pkStore.updateOpponent(data.opponent_username, data.opponent_photo);
             setTimeout(() => {
                 pkStore.updateStatus("playing");
-            }, 2000)
+            }, 100)
             pkStore.updateGameObject(data.game);
-
         }
+        else if (data.event === "move") {
+            console.log("收到移动命令", data);
+            const gameMap = pkStore.gameMap;
+            if (!gameMap || !gameMap.snakes) {
+                console.log("⚠️ gameMap 还没准备好，方向被丢弃了", gameMap); // 加这行
+                return;
+            }
+            const [snake0, snake1] = gameMap.snakes;
+            snake0.set_direction(data.a_step);
+            snake1.set_direction(data.b_step);
+        }
+        else if (data.event === "result") {
+            console.log("比赛结果", data);
+        }
+
     }
     socket.onclose = () => {
         console.log("连接关闭");

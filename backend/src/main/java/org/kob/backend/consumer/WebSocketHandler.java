@@ -115,6 +115,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
         matchPool.remove(player);
     }
 
+    private void move(Integer userId, Integer direction) {
+        Player player = playerManager.getPlayer(userId);
+        if (player == null || player.getGame() == null)
+            return;
+
+        Game game = player.getGame();
+        if (game.getP1() == player) {
+            game.setNextStepP1(direction);
+        } else if (game.getP2() == player) {
+            game.setNextStepP2(direction);
+        }
+    }
+
     @Override // 相当于 @OnMessage（收到消息）
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         System.out.println("收到消息");
@@ -125,6 +138,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
             startMatching(userId);
         } else if ("stop-matching".equals(event)) {
             stopMatching(userId);
+        } else if ("move".equals(event)) {
+            move(userId, data.get("direction").asInt());
         }
     }
 

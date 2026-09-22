@@ -9,6 +9,7 @@ export const usePkStore = defineStore('pk', () => {
     const opponentPhoto = ref('https://api.dicebear.com/10.x/bottts/svg?seed=opponent_photo');
     const opponentSelectedBotId = ref("-1");
     const gameObject = ref(null);
+    const gameMap = ref(null);
 
     const updateSocket = (newSocket) => {
         socket.value = newSocket;
@@ -23,6 +24,10 @@ export const usePkStore = defineStore('pk', () => {
 
     const updateGameObject = (game) => {
         gameObject.value = game;
+    }
+
+    const updateGameMap = (newGameMap) => {
+        gameMap.value = newGameMap;
     }
 
     const updateOpponent = (username, photo) => {
@@ -42,10 +47,12 @@ export const usePkStore = defineStore('pk', () => {
         opponentPhoto,
         opponentSelectedBotId,
         gameObject,
+        gameMap,
         updateSocket,
         updateOpponent,
         updateStatus,
         initOpponent,
         updateGameObject,
+        updateGameMap,
     }
 })

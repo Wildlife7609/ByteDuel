@@ -84,8 +84,8 @@ public class Game extends Thread {
             resp.put("event", "move");
             resp.put("a_step", nextStepP1);
             resp.put("b_step", nextStepP2);
-            nextStepP1 = nextStepP2 = null;
             sendMessageToAll(resp.toString());
+            nextStepP1 = nextStepP2 = null;
         } finally {
             lock.unlock();
         }
@@ -140,9 +140,9 @@ public class Game extends Thread {
             throw new RuntimeException(e);
         }
 
-        for (int i = 0; i < 25; i++) {
+        for (int i = 0; i < 5; i++) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(1000);
                 lock.lock();
                 try {
                     if (nextStepP1 != null && nextStepP2 != null) {
