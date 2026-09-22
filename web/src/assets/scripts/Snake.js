@@ -10,7 +10,7 @@ export class Snake extends AcGameObject {
 
         this.cells = [new Cell(info.r, info.c)]; // 蛇的身体
         this.next_cell = null; // 下一步要添加的位置
-        this.speed = 5;
+        this.speed = 5; // 蛇移动速度, 每秒移动5个格子
         this.direction = -1; // -1:未按键, 0:上, 1:右, 2:下, 3:左
         this.status = "idle"; // "idle" : 静止, "move" : 移动, "die" : 死亡
 

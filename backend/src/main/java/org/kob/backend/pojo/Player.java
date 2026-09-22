@@ -1,5 +1,6 @@
 package org.kob.backend.pojo;
 
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import lombok.AllArgsConstructor;
@@ -24,5 +25,17 @@ public class Player {
     public Player(User user, WebSocketSession session) {
         this.user = user;
         this.session = session;
+    }
+
+    public void sendMessage(String message) {
+        try {
+            if (session != null && session.isOpen()) {
+                synchronized (session) {
+                    session.sendMessage(new TextMessage(message));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

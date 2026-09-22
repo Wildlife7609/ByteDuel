@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.kob.backend.pojo.Player;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
 
 @Component
 public class PlayerManager {
@@ -27,17 +26,4 @@ public class PlayerManager {
             return null;
         return players.get(userId);
     }
-
-    public void sendMessage(Player player, String message) {
-        if (player != null && player.getSession() != null && player.getSession().isOpen()) {
-            try {
-                synchronized (player.getSession()) {
-                    player.getSession().sendMessage(new TextMessage(message));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
 }

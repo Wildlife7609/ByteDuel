@@ -70,14 +70,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
             game.createMap();
 
             a.setGame(game);
-            a.setSx(game.rows - 2);
+            a.setSx(game.getRows() - 2);
             a.setSy(1);
             a.setSteps(new ArrayList<>());
 
             b.setGame(game);
             b.setSx(1);
-            b.setSy(game.cols - 2);
+            b.setSy(game.getCols() - 2);
             b.setSteps(new ArrayList<>());
+
+            game.start();
 
             ObjectNode respGame = objectMapper.createObjectNode();
             respGame.put("a_id", a.getUser().getId());
@@ -100,8 +102,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
             respB.put("opponent_photo", a.getUser().getPhoto());
             respB.set("game", respGame);
 
-            playerManager.sendMessage(a, respA.toString());
-            playerManager.sendMessage(b, respB.toString());
+            a.sendMessage(respA.toString());
+            b.sendMessage(respB.toString());
         }
     }
 
