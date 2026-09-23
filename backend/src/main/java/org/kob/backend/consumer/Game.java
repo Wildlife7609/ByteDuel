@@ -1,9 +1,11 @@
 package org.kob.backend.consumer;
 
 import java.util.Random;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.kob.backend.pojo.Player;
+import org.kob.backend.pojo.Cell;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -21,7 +23,7 @@ public class Game extends Thread {
     private final ReentrantLock lock = new ReentrantLock();
 
     private String status = "playing"; // "playing" : 游戏进行中, "finished" : 游戏结束
-    private String winner = ""; // "all": 平局, "A" : A 赢, "B" : B 赢
+    private String loser = ""; // "all": 平局, "A" : A 输, "B" : B 输
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -72,7 +74,14 @@ public class Game extends Thread {
     private void sendResult() {
         ObjectNode resp = objectMapper.createObjectNode();
         resp.put("event", "result");
-        resp.put("winner", winner);
+        resp.put("loser", loser);
+        lock.lock();
+        try {
+            resp.put("a_step", nextStepP1); // 最后一步的方向，前端用来转眼睛
+            resp.put("b_step", nextStepP2);
+        } finally {
+            lock.unlock();
+        }
         sendMessageToAll(resp.toString());
 
     }
@@ -96,8 +105,44 @@ public class Game extends Thread {
         p2.sendMessage(message);
     }
 
-    private void judge() { // 判断两个玩家下一步操作是否合法
+    private boolean check_valid(List<Cell> cellsA, List<Cell> cellsB) {
+        int n = cellsA.size();
+        Cell cell = cellsA.get(n - 1);
+        if (g[cell.getX()][cell.getY()] == 1)
+            return false; // 撞墙
+        for (int i = 0; i < n - 1; i++) {
+            if (cellsA.get(i).getX() == cell.getX() && cellsA.get(i).getY() == cell.getY())
+                return false; // 撞到自己
+            if (cellsB.get(i).getX() == cell.getX() && cellsB.get(i).getY() == cell.getY())
+                return false; // 撞到对方
+        }
+        return true;
+    }
 
+    private void judge() { // 判断两个玩家下一步操作是否合法
+        List<Cell> cellsA = p1.getCells();
+        List<Cell> cellsB = p2.getCells();
+        boolean vaildA = check_valid(cellsA, cellsB);
+        boolean vaildB = check_valid(cellsB, cellsA);
+        // // TODO 调试用，定位后删除
+        // Cell headA = cellsA.get(cellsA.size() - 1), headB = cellsB.get(cellsB.size()
+        // - 1);
+        // System.out.printf("[judge] game=%d A steps=%s cells=%s g=%d valid=%b | B
+        // steps=%s cells=%s g=%d valid=%b%n",
+        // System.identityHashCode(this),
+        // p1.getSteps(), cellsA, g[headA.getX()][headA.getY()], vaildA,
+        // p2.getSteps(), cellsB, g[headB.getX()][headB.getY()], vaildB);
+
+        if (!vaildA || !vaildB) {
+            if (!vaildA && !vaildB) {
+                loser = "all";
+            } else if (!vaildA) {
+                loser = "A";
+            } else {
+                loser = "B";
+            }
+            status = "finished";
+        }
     }
 
     @Override
@@ -116,11 +161,11 @@ public class Game extends Thread {
                 lock.lock();
                 try {
                     if (nextStepP1 == null && nextStepP2 == null) {
-                        winner = "all";
+                        loser = "all";
                     } else if (nextStepP1 == null) {
-                        winner = "B";
+                        loser = "A";
                     } else {
-                        winner = "A";
+                        loser = "B";
                     }
                 } finally {
                     lock.unlock();

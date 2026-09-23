@@ -80,6 +80,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
             b.setSteps(new ArrayList<>());
 
             game.start();
+            // System.out.println("[match] create game=" + System.identityHashCode(game));
+            // // TODO 调试用，定位后删除
 
             ObjectNode respGame = objectMapper.createObjectNode();
             respGame.put("a_id", a.getUser().getId());
