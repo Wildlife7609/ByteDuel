@@ -4,6 +4,7 @@ import { usePkStore } from '@/stores/pk';
 import { useUserStore } from '@/stores/user';
 import { onMounted, onUnmounted } from 'vue';
 import MatchGround from '@/components/MatchGround.vue';
+import ResultBoard from '@/components/ResultBoard.vue';
 
 const pkStore = usePkStore();
 const userStore = useUserStore();
@@ -51,11 +52,15 @@ onMounted(() => {
             } else if (data.loser === "B") {
                 snake1.status = "die";
             }
+            pkStore.updateLoser(data.loser);
         }
 
     }
-    socket.onclose = () => {
+    socket.onclose = (e) => {
         console.log("连接关闭");
+        if (e.code === 4000) { // 后端踢下线：同一账号在别的窗口连上了
+            alert("你的账号已在其他窗口进入对战页面，当前窗口已断开");
+        }
     }
 })
 
@@ -70,6 +75,7 @@ onUnmounted(() => {
 <template>
     <PlayGround v-if="pkStore.status === 'playing'" />
     <MatchGround v-if="pkStore.status === 'matching'" />
+    <ResultBoard v-if="pkStore.loser !== 'none'" />
 </template>
 
 <style scoped></style>

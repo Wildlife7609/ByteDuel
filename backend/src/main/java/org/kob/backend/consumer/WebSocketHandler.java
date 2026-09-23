@@ -46,8 +46,18 @@ public class WebSocketHandler extends TextWebSocketHandler {
             return;
         }
         session.getAttributes().put("userId", userId);
+        Player oldPlayer = playerManager.getPlayer(userId);
         Player player = new Player(user, session);
         playerManager.addPlayer(player);
+
+        if (oldPlayer != null) { // 同一账号只允许一个在线连接，踢掉旧的
+            matchPool.remove(oldPlayer);
+            try {
+                oldPlayer.getSession().close(new CloseStatus(4000, "kicked"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         System.out.println("玩家连接成功: " + user.getUsername());
     }
 
@@ -109,10 +119,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void stopMatching(Integer userId) {
+    private void stopMatching(Integer userId, WebSocketSession session) {
         System.out.println("取消匹配");
         Player player = playerManager.getPlayer(userId);
-        if (player == null)
+        if (player == null || player.getSession() != session) // 只处理这个连接自己的 player，不误删同一用户新建立的连接
             return;
         matchPool.remove(player);
     }
@@ -139,7 +149,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         if ("start-matching".equals(event)) {
             startMatching(userId);
         } else if ("stop-matching".equals(event)) {
-            stopMatching(userId);
+            stopMatching(userId, session);
         } else if ("move".equals(event)) {
             move(userId, data.get("direction").asInt());
         }
@@ -148,8 +158,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Override // 相当于 @OnClose（断开连接）
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Integer userId = (Integer) session.getAttributes().get("userId");
-        stopMatching(userId);
-        playerManager.removePlayer(userId);
+        stopMatching(userId, session);
+        playerManager.removePlayer(userId, session);
         System.out.println("玩家断开连接: " + userId);
 
     }

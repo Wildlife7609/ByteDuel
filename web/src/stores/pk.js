@@ -10,6 +10,7 @@ export const usePkStore = defineStore('pk', () => {
     const opponentSelectedBotId = ref("-1");
     const gameObject = ref(null);
     const gameMap = ref(null);
+    const loser = ref("none"); // "all", "A", "B", "none"
 
     const updateSocket = (newSocket) => {
         socket.value = newSocket;
@@ -39,6 +40,10 @@ export const usePkStore = defineStore('pk', () => {
         status.value = newStatus;
     }
 
+    const updateLoser = (newLoser) => {
+        loser.value = newLoser;
+    }
+
     return {
         socket,
         status,
@@ -48,6 +53,8 @@ export const usePkStore = defineStore('pk', () => {
         opponentSelectedBotId,
         gameObject,
         gameMap,
+        loser,
+        updateLoser,
         updateSocket,
         updateOpponent,
         updateStatus,

@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.kob.backend.pojo.Player;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
 
 @Component
 public class PlayerManager {
@@ -15,9 +16,11 @@ public class PlayerManager {
         }
     }
 
-    public void removePlayer(Integer userId) {
-        if (userId != null) {
-            players.remove(userId);
+    // PlayerManager
+    public void removePlayer(Integer userId, WebSocketSession session) {
+        Player p = players.get(userId);
+        if (p != null && p.getSession() == session) {
+            players.remove(userId, p);
         }
     }
 

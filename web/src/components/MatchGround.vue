@@ -86,7 +86,9 @@ div.matchground {
 div.user-photo>img {
     border-radius: 50%;
     width: 16vh;
-    height: 16vh;
+    max-width: 100%; /* 不超过所在列的宽度 */
+    height: auto;
+    aspect-ratio: 1 / 1; /* 始终保持正方形，圆形头像不变形 */
     object-fit: cover;
     /* 头像光晕描边与立体阴影 */
     border: 5px solid rgba(255, 255, 255, 0.8);
