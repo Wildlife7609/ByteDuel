@@ -1,10 +1,13 @@
 package org.kob.backend.consumer;
 
+import java.util.Date;
 import java.util.Random;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.kob.backend.mapper.RecordMapper;
 import org.kob.backend.pojo.Player;
+import org.kob.backend.pojo.Record;
 import org.kob.backend.pojo.Cell;
 
 import tools.jackson.databind.ObjectMapper;
@@ -26,14 +29,17 @@ public class Game extends Thread {
     private String loser = ""; // "all": 平局, "A" : A 输, "B" : B 输
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final RecordMapper recordMapper; // Game 是 new 出来的，不能 @Autowired，由 WebSocketHandler 传入
 
-    public Game(Integer rows, Integer cols, Integer inner_walls_count, Player p1, Player p2) {
+    public Game(Integer rows, Integer cols, Integer inner_walls_count, Player p1, Player p2,
+            RecordMapper recordMapper) {
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_count = inner_walls_count;
         this.g = new int[rows][cols];
         this.p1 = p1;
         this.p2 = p2;
+        this.recordMapper = recordMapper;
         createMap();
     }
 
@@ -71,7 +77,37 @@ public class Game extends Thread {
         }
     }
 
+    private String getStepsString(Player p) { // [2, 0, 1] → "201"
+        StringBuilder sb = new StringBuilder();
+        for (int d : p.getSteps())
+            sb.append(d);
+        return sb.toString();
+    }
+
+    private String getMapString() { // 按行拼成一串 0/1
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                sb.append(g[i][j]);
+        return sb.toString();
+    }
+
+    private void saveToDatabase() {
+        Record record = new Record(
+                null,
+                p1.getUser().getId(), p1.getSx(), p1.getSy(),
+                p2.getUser().getId(), p2.getSx(), p2.getSy(),
+                getStepsString(p1), getStepsString(p2),
+                getMapString(), loser, new Date());
+        recordMapper.insert(record);
+    }
+
     private void sendResult() {
+        try {
+            saveToDatabase(); // 先存库，再通知前端
+        } catch (Exception e) {
+            e.printStackTrace(); // 存库失败也要把结果发给前端
+        }
         ObjectNode resp = objectMapper.createObjectNode();
         resp.put("event", "result");
         resp.put("loser", loser);

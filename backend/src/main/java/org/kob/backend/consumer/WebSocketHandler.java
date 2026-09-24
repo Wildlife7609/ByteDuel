@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.kob.backend.mapper.UserMapper;
+import org.kob.backend.mapper.RecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
@@ -27,6 +28,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private PlayerManager playerManager;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private RecordMapper recordMapper;
 
     private static final Set<Player> matchPool = ConcurrentHashMap.newKeySet();
 
@@ -76,7 +79,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             matchPool.remove(a);
             matchPool.remove(b);
 
-            Game game = new Game(15, 14, 20, a, b);
+            Game game = new Game(15, 14, 20, a, b, recordMapper);
             game.createMap();
 
             a.setGame(game);
@@ -90,9 +93,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
             b.setSteps(new ArrayList<>());
 
             game.start();
-            // System.out.println("[match] create game=" + System.identityHashCode(game));
-            // // TODO 调试用，定位后删除
-
             ObjectNode respGame = objectMapper.createObjectNode();
             respGame.put("a_id", a.getUser().getId());
             respGame.put("a_sx", a.getSx());
