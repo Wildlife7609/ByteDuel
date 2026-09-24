@@ -1,9 +1,6 @@
 package org.kob.backend.consumer;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.kob.backend.mapper.UserMapper;
 import org.kob.backend.mapper.RecordMapper;
@@ -31,8 +28,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Autowired
     private RecordMapper recordMapper;
 
-    private static final Set<Player> matchPool = ConcurrentHashMap.newKeySet();
-
     @Override // 相当于 @OnOpen（建立连接）
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String path = session.getUri().getPath();
@@ -54,7 +49,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         playerManager.addPlayer(player);
 
         if (oldPlayer != null) { // 同一账号只允许一个在线连接，踢掉旧的
-            matchPool.remove(oldPlayer);
             try {
                 oldPlayer.getSession().close(new CloseStatus(4000, "kicked"));
             } catch (Exception e) {
@@ -64,59 +58,52 @@ public class WebSocketHandler extends TextWebSocketHandler {
         System.out.println("玩家连接成功: " + user.getUsername());
     }
 
+    private void startGame(Player a, Player b) {
+        Game game = new Game(15, 14, 20, a, b, recordMapper);
+        game.createMap();
+
+        a.setGame(game);
+        a.setSx(game.getRows() - 2);
+        a.setSy(1);
+        a.setSteps(new ArrayList<>());
+
+        b.setGame(game);
+        b.setSx(1);
+        b.setSy(game.getCols() - 2);
+        b.setSteps(new ArrayList<>());
+
+        game.start();
+        ObjectNode respGame = objectMapper.createObjectNode();
+        respGame.put("a_id", a.getUser().getId());
+        respGame.put("a_sx", a.getSx());
+        respGame.put("a_sy", a.getSy());
+        respGame.put("b_id", b.getUser().getId());
+        respGame.put("b_sx", b.getSx());
+        respGame.put("b_sy", b.getSy());
+        respGame.putPOJO("map", game.getG());
+
+        ObjectNode respA = objectMapper.createObjectNode();
+        respA.put("event", "match-success");
+        respA.put("opponent_username", b.getUser().getUsername());
+        respA.put("opponent_photo", b.getUser().getPhoto());
+        respA.set("game", respGame);
+
+        ObjectNode respB = objectMapper.createObjectNode();
+        respB.put("event", "match-success");
+        respB.put("opponent_username", a.getUser().getUsername());
+        respB.put("opponent_photo", a.getUser().getPhoto());
+        respB.set("game", respGame);
+
+        a.sendMessage(respA.toString());
+        b.sendMessage(respB.toString());
+    }
+
     private void startMatching(Integer userId) {
         System.out.println("开始匹配");
         Player player = playerManager.getPlayer(userId);
         if (player == null)
             return;
-        matchPool.add(player);
-
-        while (matchPool.size() >= 2) {
-            Iterator<Player> it = matchPool.iterator();
-            Player a = it.next();
-            Player b = it.next();
-
-            matchPool.remove(a);
-            matchPool.remove(b);
-
-            Game game = new Game(15, 14, 20, a, b, recordMapper);
-            game.createMap();
-
-            a.setGame(game);
-            a.setSx(game.getRows() - 2);
-            a.setSy(1);
-            a.setSteps(new ArrayList<>());
-
-            b.setGame(game);
-            b.setSx(1);
-            b.setSy(game.getCols() - 2);
-            b.setSteps(new ArrayList<>());
-
-            game.start();
-            ObjectNode respGame = objectMapper.createObjectNode();
-            respGame.put("a_id", a.getUser().getId());
-            respGame.put("a_sx", a.getSx());
-            respGame.put("a_sy", a.getSy());
-            respGame.put("b_id", b.getUser().getId());
-            respGame.put("b_sx", b.getSx());
-            respGame.put("b_sy", b.getSy());
-            respGame.putPOJO("map", game.getG());
-
-            ObjectNode respA = objectMapper.createObjectNode();
-            respA.put("event", "match-success");
-            respA.put("opponent_username", b.getUser().getUsername());
-            respA.put("opponent_photo", b.getUser().getPhoto());
-            respA.set("game", respGame);
-
-            ObjectNode respB = objectMapper.createObjectNode();
-            respB.put("event", "match-success");
-            respB.put("opponent_username", a.getUser().getUsername());
-            respB.put("opponent_photo", a.getUser().getPhoto());
-            respB.set("game", respGame);
-
-            a.sendMessage(respA.toString());
-            b.sendMessage(respB.toString());
-        }
+        // TODO: 调用匹配服务 /player/add/
     }
 
     private void stopMatching(Integer userId, WebSocketSession session) {
@@ -124,7 +111,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Player player = playerManager.getPlayer(userId);
         if (player == null || player.getSession() != session) // 只处理这个连接自己的 player，不误删同一用户新建立的连接
             return;
-        matchPool.remove(player);
+        // TODO: 调用匹配服务 /player/remove/
     }
 
     private void move(Integer userId, Integer direction) {
