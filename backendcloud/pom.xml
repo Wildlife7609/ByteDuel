@@ -15,6 +15,7 @@
 	<description>backendcloud</description>
     <modules>
         <module>matchingsystem</module>
+	    <module>backend</module>
 	</modules>
     <packaging>pom</packaging>
 
