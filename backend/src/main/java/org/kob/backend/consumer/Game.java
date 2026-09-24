@@ -160,14 +160,6 @@ public class Game extends Thread {
         List<Cell> cellsB = p2.getCells();
         boolean vaildA = check_valid(cellsA, cellsB);
         boolean vaildB = check_valid(cellsB, cellsA);
-        // // TODO 调试用，定位后删除
-        // Cell headA = cellsA.get(cellsA.size() - 1), headB = cellsB.get(cellsB.size()
-        // - 1);
-        // System.out.printf("[judge] game=%d A steps=%s cells=%s g=%d valid=%b | B
-        // steps=%s cells=%s g=%d valid=%b%n",
-        // System.identityHashCode(this),
-        // p1.getSteps(), cellsA, g[headA.getX()][headA.getY()], vaildA,
-        // p2.getSteps(), cellsB, g[headB.getX()][headB.getY()], vaildB);
 
         if (!vaildA || !vaildB) {
             if (!vaildA && !vaildB) {
