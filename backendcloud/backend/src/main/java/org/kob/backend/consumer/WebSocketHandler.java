@@ -6,6 +6,9 @@ import org.kob.backend.mapper.UserMapper;
 import org.kob.backend.mapper.RecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -27,6 +30,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private ObjectMapper objectMapper;
     @Autowired
     private RecordMapper recordMapper;
+    @Autowired
+    private RestTemplate restTemplate;
+
+    private static final String addPlayerUrl = "http://127.0.0.1:8081/player/add/";
+    private static final String removePlayerUrl = "http://127.0.0.1:8081/player/remove/";
 
     @Override // 相当于 @OnOpen（建立连接）
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -103,7 +111,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Player player = playerManager.getPlayer(userId);
         if (player == null)
             return;
-        // TODO: 调用匹配服务 /player/add/
+        
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", userId.toString());
+        data.add("rating", player.getUser().getRating().toString());
+        restTemplate.postForObject(addPlayerUrl, data, String.class);
+
     }
 
     private void stopMatching(Integer userId, WebSocketSession session) {
@@ -111,7 +124,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Player player = playerManager.getPlayer(userId);
         if (player == null || player.getSession() != session) // 只处理这个连接自己的 player，不误删同一用户新建立的连接
             return;
-        // TODO: 调用匹配服务 /player/remove/
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", userId.toString());
+        restTemplate.postForObject(removePlayerUrl, data, String.class);
     }
 
     private void move(Integer userId, Integer direction) {

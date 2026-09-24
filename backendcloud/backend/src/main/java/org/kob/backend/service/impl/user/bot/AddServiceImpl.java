@@ -68,7 +68,6 @@ public class AddServiceImpl implements AddService {
                 title,
                 description,
                 content,
-                1500,
                 now,
                 now);
         botMapper.insert(bot);
