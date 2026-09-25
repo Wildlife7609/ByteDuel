@@ -29,7 +29,7 @@ public class Game extends Thread {
     private String loser = ""; // "all": 平局, "A" : A 输, "B" : B 输
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final RecordMapper recordMapper; // Game 是 new 出来的，不能 @Autowired，由 WebSocketHandler 传入
+    private final RecordMapper recordMapper; // Game 是 new 出来的，不能 @Autowired，由 StartGameServiceImpl 传入
 
     public Game(Integer rows, Integer cols, Integer inner_walls_count, Player p1, Player p2,
             RecordMapper recordMapper) {

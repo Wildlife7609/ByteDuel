@@ -1,6 +1,5 @@
 package com.kob.matchingsystem;
 
-import com.kob.matchingsystem.service.impl.MatchingServieImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MatchingSystemApplication {
     static void main(String[] args) {
-        MatchingServieImpl.matchingPool.start(); // Start the matching pool thread
         SpringApplication.run(MatchingSystemApplication.class, args);
     }
 }
