@@ -52,6 +52,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (oldPlayer != null) { // 同一账号只允许一个在线连接，踢掉旧的
             try {
+                // 旧连接关闭时 stopMatching 会因为 session 不匹配而跳过，所以在这里把该用户移出匹配池
+                removeFromMatchingPool(userId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
                 oldPlayer.getSession().close(new CloseStatus(4000, "kicked"));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -78,6 +84,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Player player = playerManager.getPlayer(userId);
         if (player == null || player.getSession() != session) // 只处理这个连接自己的 player，不误删同一用户新建立的连接
             return;
+        removeFromMatchingPool(userId);
+    }
+
+    private void removeFromMatchingPool(Integer userId) {
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("user_id", userId.toString());
         restTemplate.postForObject(removePlayerUrl, data, String.class);
