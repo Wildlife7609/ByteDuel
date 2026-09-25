@@ -66,7 +66,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         System.out.println("玩家连接成功: " + user.getUsername());
     }
 
-    private void startGame(Player a, Player b) {
+    public void startGame(Player a, Player b) {
         Game game = new Game(15, 14, 20, a, b, recordMapper);
         game.createMap();
 
