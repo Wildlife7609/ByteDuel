@@ -52,13 +52,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (oldPlayer != null) { // 同一账号只允许一个在线连接，踢掉旧的
             try {
+                oldPlayer.getSession().close(new CloseStatus(4000, "kicked"));
                 // 旧连接关闭时 stopMatching 会因为 session 不匹配而跳过，所以在这里把该用户移出匹配池
                 removeFromMatchingPool(userId);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                oldPlayer.getSession().close(new CloseStatus(4000, "kicked"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
