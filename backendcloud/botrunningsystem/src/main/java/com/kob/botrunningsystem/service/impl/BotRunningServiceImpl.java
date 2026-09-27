@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BotRunningServiceImpl implements BotRunningService {
-    @Override
-    private final BotPool botPool;
+    @Autowired
+    private BotPool botPool;
 
     @Override
     public String addBot(Integer userId, String botCode, String input) {
