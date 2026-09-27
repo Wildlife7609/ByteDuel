@@ -18,9 +18,10 @@ axios.get("/user/bot/getlist/").then(resp => {
 const click_match_btn = () => {
     if (matchBtnText.value === "开始匹配") {
         matchBtnText.value = "取消";
-        // 向后端发送开始匹配消息（带上选中的 bot_id）
+        // 向后端发送开始匹配消息，并传递选中的 bot_id
         pkStore.socket?.send(JSON.stringify({
             event: "start-matching",
+            bot_id: pkStore.selectedBotId,  // 传递选中的 bot_id
         }));
     } else {
         matchBtnText.value = "开始匹配";
@@ -48,7 +49,7 @@ const click_match_btn = () => {
                 <div class="vs-badge">VS</div>
                 <div class="user-select-bot my-4">
                     <select class="form-select select-bot" v-model="pkStore.selectedBotId">
-                        <option value="-1" selected>亲自出战</option>
+                        <option :value="-1">亲自出战</option>
                         <option v-for="bot in bots" :key="bot.id" :value="bot.id">
                             {{ bot.title }}
                         </option>

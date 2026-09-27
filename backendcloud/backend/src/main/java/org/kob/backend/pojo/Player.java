@@ -18,6 +18,7 @@ import org.kob.backend.consumer.Game;
 public class Player {
     private User user;
     private WebSocketSession session;
+    private Bot bot;
     private Game game;
 
     private Integer sx, sy;

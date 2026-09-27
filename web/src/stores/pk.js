@@ -4,10 +4,10 @@ import { defineStore } from 'pinia'
 export const usePkStore = defineStore('pk', () => {
     const socket = ref(null);
     const status = ref('matching'); // 'matching' or 'playing'
-    const selectedBotId = ref("-1");
+    const selectedBotId = ref(-1);
     const opponentUsername = ref('???');
     const opponentPhoto = ref('https://api.dicebear.com/10.x/bottts/svg?seed=opponent_photo');
-    const opponentSelectedBotId = ref("-1");
+    const opponentSelectedBotId = ref(-1);
     const gameObject = ref(null);
     const gameMap = ref(null);
     const loser = ref("none"); // "all", "A", "B", "none"
@@ -19,7 +19,7 @@ export const usePkStore = defineStore('pk', () => {
     const initOpponent = () => {
         opponentUsername.value = '???';
         opponentPhoto.value = 'https://api.dicebear.com/10.x/bottts/svg?seed=opponent_photo';
-        opponentSelectedBotId.value = "-1";
+        opponentSelectedBotId.value = -1;
         gameObject.value = null;
     }
 

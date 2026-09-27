@@ -10,6 +10,9 @@ import org.kob.backend.pojo.Player;
 import org.kob.backend.pojo.Record;
 import org.kob.backend.pojo.Cell;
 
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -30,9 +33,11 @@ public class Game extends Thread {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final RecordMapper recordMapper; // Game 是 new 出来的，不能 @Autowired，由 StartGameServiceImpl 传入
+    private final RestTemplate restTemplate; // Game 是 new 出来的，不能 @Autowired，由 StartGameServiceImpl 传入
+    private static final String addBotUrl = "http://127.0.0.1:8082/bot/add/";
 
     public Game(Integer rows, Integer cols, Integer inner_walls_count, Player p1, Player p2,
-            RecordMapper recordMapper) {
+            RecordMapper recordMapper, RestTemplate restTemplate) {
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_count = inner_walls_count;
@@ -40,6 +45,7 @@ public class Game extends Thread {
         this.p1 = p1;
         this.p2 = p2;
         this.recordMapper = recordMapper;
+        this.restTemplate = restTemplate;
         createMap();
     }
 
@@ -74,6 +80,28 @@ public class Game extends Thread {
             this.nextStepP2 = nextStepP2;
         } finally {
             lock.unlock();
+        }
+    }
+
+    private String getInput(Player player) { //将当前的局面信息，编码成字符串
+        Player me = player, you = (player == p1) ? p2 : p1;
+    return getMapString() + "#"
+            + me.getSx() + "#" + me.getSy() + "#(" + getStepsString(me) + ")#"
+            + you.getSx() + "#" + you.getSy() + "#(" + getStepsString(you) + ")";
+    }
+
+    private void sendBotCode(Player player) {
+        if (player.getBot() == null) return;
+        String botCode = player.getBot().getContent();
+        if (botCode == null || botCode.length() == 0) return;
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", player.getUser().getId().toString());
+        data.add("bot_code", botCode);
+        data.add("input", getInput(player));
+        try {
+            restTemplate.postForObject(addBotUrl, data, String.class);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -212,7 +240,9 @@ public class Game extends Thread {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
+        sendBotCode(p1);
+        sendBotCode(p2);
+        
         for (int i = 0; i < 25; i++) {
             try {
                 Thread.sleep(200);

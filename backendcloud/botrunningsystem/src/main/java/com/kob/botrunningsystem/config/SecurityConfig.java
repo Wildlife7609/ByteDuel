@@ -1,4 +1,4 @@
-package com.kob.matchingsystem.config;
+package com.kob.botrunningsystem.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/player/add/", "/player/remove/")
+                                                .requestMatchers("/bot/add/")
                                                 .access((authentication, context) -> new AuthorizationDecision(
                                                                 LOCALHOST.matches(context.getRequest())))
                                                 .anyRequest().denyAll());

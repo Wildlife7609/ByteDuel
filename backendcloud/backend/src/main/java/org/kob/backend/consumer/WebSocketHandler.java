@@ -13,6 +13,9 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import org.kob.backend.pojo.User;
+import org.kob.backend.mapper.BotMapper;
+import org.kob.backend.pojo.Bot;
+
 import org.kob.backend.pojo.Player;
 import org.kob.backend.utils.JwtUtil;
 
@@ -20,6 +23,8 @@ import org.kob.backend.utils.JwtUtil;
 public class WebSocketHandler extends TextWebSocketHandler {
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private BotMapper botMapper;
     @Autowired
     private PlayerManager playerManager;
     @Autowired
@@ -62,12 +67,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
         System.out.println("玩家连接成功: " + user.getUsername());
     }
 
-    private void startMatching(Integer userId) {
+    private void startMatching(Integer userId, Integer botId) {
         System.out.println("开始匹配");
         Player player = playerManager.getPlayer(userId);
         if (player == null)
             return;
-        
+        Bot bot = null;
+        if (botId != -1) {
+            bot = botMapper.selectById(botId);
+            if (bot == null || !bot.getUserId().equals(userId)) {      
+                return;
+            }
+        }
+        player.setBot(bot);
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("user_id", userId.toString());
         data.add("rating", player.getUser().getRating().toString());
@@ -91,9 +103,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     private void move(Integer userId, Integer direction) {
         Player player = playerManager.getPlayer(userId);
-        if (player == null || player.getGame() == null)
+        if (player == null || player.getGame() == null || player.getBot() != null) 
             return;
-
         Game game = player.getGame();
         if (game.getP1() == player) {
             game.setNextStepP1(direction);
@@ -109,7 +120,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String event = data.get("event").asString();
         Integer userId = (Integer) session.getAttributes().get("userId");
         if ("start-matching".equals(event)) {
-            startMatching(userId);
+            Integer botId = data.path("bot_id").asInt(-1);
+            startMatching(userId, botId);
         } else if ("stop-matching".equals(event)) {
             stopMatching(userId, session);
         } else if ("move".equals(event)) {
@@ -124,7 +136,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         try {
             stopMatching(userId, session);
         } finally {
-            playerManager.removePlayer(userId, session);
+            playerManager.removePlayer(userId,session);
             System.out.println("玩家断开连接: " + userId);
         }
     }

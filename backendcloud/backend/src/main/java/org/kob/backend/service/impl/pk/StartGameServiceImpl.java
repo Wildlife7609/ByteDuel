@@ -10,6 +10,7 @@ import org.kob.backend.service.pk.StartGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -21,6 +22,8 @@ public class StartGameServiceImpl implements StartGameService {
     private ObjectMapper objectMapper;
     @Autowired
     private RecordMapper recordMapper;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public String startGame(Integer aId, Integer bId) {
@@ -33,7 +36,7 @@ public class StartGameServiceImpl implements StartGameService {
     }
 
     private void startGame(Player a, Player b) {
-        Game game = new Game(15, 14, 20, a, b, recordMapper);
+        Game game = new Game(15, 14, 20, a, b, recordMapper, restTemplate);
         game.createMap();
 
         a.setGame(game);

@@ -13,5 +13,4 @@
     <artifactId>matchingsystem</artifactId>
 
     <!-- webmvc、security、lombok 继承自父 pom -->
-
 </project>

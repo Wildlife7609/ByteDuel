@@ -38,6 +38,8 @@ export class GameMap extends AcGameObject {
 
     add_listening_event() {
         this.ctx.canvas.focus();
+        const pkStore = usePkStore();
+        if (pkStore.selectedBotId !== -1) return; // Bot 出战，不发送键盘操作
         this.ctx.canvas.addEventListener("keydown", e => {
             let d = -1;
             if (e.key === "w") d = 0;

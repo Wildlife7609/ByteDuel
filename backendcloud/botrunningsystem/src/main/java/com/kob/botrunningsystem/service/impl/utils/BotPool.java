@@ -1,47 +1,41 @@
-package com.kob.botrunningsystem.service.impl;
+package com.kob.botrunningsystem.service.impl.utils;
+
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+@Component
 public class BotPool extends Thread{
-    private static final ReentrantLock lock = new ReentrantLock();
-    private static final Condition condition = lock.newCondition();
-    private Queue<Bot> bots = new LinkedList<>();
+    @Autowired
+    private RestTemplate restTemplate;
 
-    private void consumeBot(Bot bot) {
-        try {
-            lock.lock();
-        }
+    private final BlockingQueue<Bot> bots = new LinkedBlockingQueue<>();
+
+    @PostConstruct // 依赖注入完成后再启动线程，保证 restTemplate 已就绪
+    public void init() {
+        start();
     }
 
-    public void addBot(Integer userId, String botCode, String input) {
-        lock.lock();
-        try {
-            bots.add(new Bot(userId, botCode, input));
-        } finally {
-            lock.unlock();
-        }
+   public void addBot(Integer userId, String botCode, String input) {
+        bots.add(new Bot(userId, botCode, input)); // 线程安全，立刻返回
+    }
+
+    private void consumeBot(Bot bot) {
+        // TODO: 新建线程编译执行，join(2000) 超时放弃，结果发回 backend
     }
 
     @Override
     public void run() {
         while (true) {
-            lock.lock();
-            if (bots.isEmpty()) {
-                try {
-                    condition.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    lock.unlock();
-                    break;
-                }
-            }
-            else  {
-                Bot bot = bots.remove();
-                lock.unlock();
-                consumeBot(bot); // 比较耗时 可能执行几秒钟
+            try {
+                Bot bot = bots.take(); // 队列空时自动阻塞，有任务时自动唤醒
+                consumeBot(bot);
+            } catch (InterruptedException e) {
+                break;
             }
         }
     }
