@@ -5,15 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Component
-public class BotPool extends Thread{
+public class BotPool extends Thread {
     @Autowired
     private RestTemplate restTemplate;
 
@@ -24,7 +20,7 @@ public class BotPool extends Thread{
         start();
     }
 
-   public void addBot(Integer userId, String botCode, String input) {
+    public void addBot(Integer userId, String botCode, String input) {
         bots.add(new Bot(userId, botCode, input)); // 线程安全，立刻返回
     }
 
