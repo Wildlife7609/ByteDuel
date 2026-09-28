@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Bot {
+public class BotTask {
     private Integer userId;
     private String botCode;
     private String input;
