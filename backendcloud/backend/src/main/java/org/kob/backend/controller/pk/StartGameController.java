@@ -2,11 +2,11 @@ package org.kob.backend.controller.pk;
 
 import org.kob.backend.service.pk.StartGameService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -15,9 +15,9 @@ public class StartGameController {
     private StartGameService startGameService;
 
     @PostMapping("/pk/start/game/")
-    public String startGame(@RequestBody MultiValueMap<String, String> data) {
-        Integer aId = Integer.parseInt(Objects.requireNonNull(data.getFirst("a_id")));
-        Integer bId = Integer.parseInt(Objects.requireNonNull(data.getFirst("b_id")));
+    public String startGame(@RequestBody Map<String, Integer> data) {
+        Integer aId = Objects.requireNonNull(data.get("a_id"));
+        Integer bId = Objects.requireNonNull(data.get("b_id"));
         return  startGameService.startGame(aId, bId);
     }
 }

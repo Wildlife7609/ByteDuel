@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/user/account/token/", "/user/account/register/", "/error", "/websocket/**")
                         .permitAll()
-                        .requestMatchers("/pk/start/game/").access((authentication, context) -> {
+                        .requestMatchers("/pk/start/game/", "/pk/receive/bot/move/").access((authentication, context) -> {
                             return new AuthorizationDecision(
                                     LOCALHOST.matches(context.getRequest()));
                         })

@@ -3,6 +3,7 @@ package org.kob.backend.service.impl.user.bot;
 import org.kob.backend.mapper.BotMapper;
 import org.kob.backend.pojo.Bot;
 import org.kob.backend.pojo.User;
+import org.kob.backend.service.impl.utils.BotCodeChecker;
 import org.kob.backend.service.impl.utils.UserDetailsImpl;
 import org.kob.backend.service.user.bot.UpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import java.util.Map;
 public class UpdateServiceImpl implements UpdateService {
     @Autowired
     private BotMapper botMapper;
+    @Autowired
+    private BotCodeChecker botCodeChecker;
 
     @Override
     public Map<String, String> updateBot(Map<String, String> data) {
@@ -65,6 +68,11 @@ public class UpdateServiceImpl implements UpdateService {
         }
         if (content.length() > 10000) {
             map.put("error_message", "内容长度不能大于10000");
+            return map;
+        }
+        String compileError = botCodeChecker.check(content);
+        if (compileError != null) {
+            map.put("error_message", compileError);
             return map;
         }
         Bot new_bot = new Bot(

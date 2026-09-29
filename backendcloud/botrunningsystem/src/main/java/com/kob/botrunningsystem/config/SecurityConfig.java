@@ -12,7 +12,7 @@ import org.springframework.security.web.util.matcher.IpAddressMatcher;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-        // 只允许本机（backend）调用匹配接口
+        // 只允许本机（backend）调用
         private static final IpAddressMatcher LOCALHOST = new IpAddressMatcher("127.0.0.1");
 
         @Bean
@@ -22,7 +22,7 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/bot/add/")
+                                                .requestMatchers("/bot/add/", "/bot/compile/")
                                                 .access((authentication, context) -> new AuthorizationDecision(
                                                                 LOCALHOST.matches(context.getRequest())))
                                                 .anyRequest().denyAll());

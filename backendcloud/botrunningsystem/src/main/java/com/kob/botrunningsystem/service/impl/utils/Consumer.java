@@ -1,21 +1,18 @@
 package com.kob.botrunningsystem.service.impl.utils;
 
 import org.joor.Reflect;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 public class Consumer extends Thread {
-    private static final String receiveBotMoveUrl = "http://127.0.0.1:8080/pk/receive/bot/move/";
-
-    private final RestTemplate restTemplate; // Consumer 是 new 出来的，不能 @Autowired，由 BotPool 传入
+    private final RestClient backendClient; // Consumer 是 new 出来的，不能 @Autowired，由 BotPool 传入
     private BotTask botTask;
 
-    public Consumer(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public Consumer(RestClient backendClient) {
+        this.backendClient = backendClient;
     }
 
     public void startTimeout(long timeout, BotTask botTask) {
@@ -33,17 +30,14 @@ public class Consumer extends Thread {
     @Override
     public void run() {
         try {
-            // 类名加上随机后缀，避免同名类重复编译冲突
-            String uid = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-            String code = botTask.getBotCode().replaceFirst("class Bot\\b", "class Bot" + uid);
-            Function<String, Integer> bot = Reflect.compile(
-                    "com.kob.botrunningsystem.utils.Bot" + uid, code).create().get();
+            // 每回合创建新对象，避免上一回合留下的字段状态影响这一回合
+            Function<String, Integer> bot = Reflect.onClass(BotCompiler.getBotClass(botTask.getBotCode())).create().get();
             Integer direction = bot.apply(botTask.getInput());
 
-            MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-            data.add("user_id", botTask.getUserId().toString());
-            data.add("direction", direction.toString());
-            restTemplate.postForObject(receiveBotMoveUrl, data, String.class);
+            Map<String, Integer> data = new HashMap<>();
+            data.put("user_id", botTask.getUserId());
+            data.put("direction", direction);
+            backendClient.post().uri("/pk/receive/bot/move/").body(data).retrieve().toBodilessEntity();
         } catch (Exception e) {
             e.printStackTrace(); // 编译失败或运行出错：不发送结果，Game 那边超时判负
         }

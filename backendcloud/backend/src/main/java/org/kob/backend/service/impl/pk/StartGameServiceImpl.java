@@ -10,7 +10,8 @@ import org.kob.backend.service.pk.StartGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -23,7 +24,8 @@ public class StartGameServiceImpl implements StartGameService {
     @Autowired
     private RecordMapper recordMapper;
     @Autowired
-    private RestTemplate restTemplate;
+    @Qualifier("botRunningClient") // 有两个 RestClient，按名字指定用哪一个
+    private RestClient botRunningClient;
 
     @Override
     public String startGame(Integer aId, Integer bId) {
@@ -36,7 +38,7 @@ public class StartGameServiceImpl implements StartGameService {
     }
 
     private void startGame(Player a, Player b) {
-        Game game = new Game(15, 14, 20, a, b, recordMapper, restTemplate);
+        Game game = new Game(15, 14, 20, a, b, recordMapper, botRunningClient);
         game.createMap();
 
         a.setGame(game);

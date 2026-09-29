@@ -1,25 +1,24 @@
 package com.kob.matchingsystem.service.impl.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 @Component // 必须交给 Spring 管理，@Autowired 才会生效
 public class MatchingPool extends Thread {
     @Autowired
-    private RestTemplate restTemplate;
+    private RestClient backendClient;
     private final List<Player> players = new ArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
-    private static final String startGameUrl = "http://127.0.0.1:8080/pk/start/game/";
 
-    @PostConstruct // 依赖注入完成后再启动线程，保证 restTemplate 已就绪
+    @PostConstruct // 依赖注入完成后再启动线程，保证 backendClient 已就绪
     public void init() {
         start();
     }
@@ -82,10 +81,10 @@ public class MatchingPool extends Thread {
 
     private void sendResult(Player a, Player b) { // 发送匹配结果
         System.out.println("MatchingPool sendResult " + a.getUserId() + " " + b.getUserId());
-        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-        data.add("a_id", a.getUserId().toString());
-        data.add("b_id", b.getUserId().toString());
-        restTemplate.postForObject(startGameUrl, data, String.class);
+        Map<String, Integer> data = new HashMap<>();
+        data.put("a_id", a.getUserId());
+        data.put("b_id", b.getUserId());
+        backendClient.post().uri("/pk/start/game/").body(data).retrieve().toBodilessEntity();
     }
 
     @Override

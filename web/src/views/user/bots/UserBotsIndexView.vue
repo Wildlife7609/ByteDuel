@@ -229,5 +229,8 @@ const remove_bot = async (bot) => {
 div.error-message {
     color: red;
     font-size: 14px;
+    white-space: pre-wrap; /* 编译错误是多行的，保留换行和缩进 */
+    max-height: 200px;
+    overflow-y: auto;
 }
 </style>

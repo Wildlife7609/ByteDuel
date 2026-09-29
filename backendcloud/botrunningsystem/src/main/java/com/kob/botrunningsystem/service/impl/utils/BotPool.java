@@ -3,7 +3,7 @@ package com.kob.botrunningsystem.service.impl.utils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -11,11 +11,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Component
 public class BotPool extends Thread {
     @Autowired
-    private RestTemplate restTemplate;
+    private RestClient backendClient;
 
     private final BlockingQueue<BotTask> bots = new LinkedBlockingQueue<>();
 
-    @PostConstruct // 依赖注入完成后再启动线程，保证 restTemplate 已就绪
+    @PostConstruct // 依赖注入完成后再启动线程，保证 backendClient 已就绪
     public void init() {
         start();
     }
@@ -26,7 +26,7 @@ public class BotPool extends Thread {
 
     private void consumeBot(BotTask botTask) {
         // 由虚拟线程等待执行结果，boss 线程不被 join 阻塞，可以马上处理下一个任务
-        Thread.ofVirtual().start(() -> new Consumer(restTemplate).startTimeout(2000, botTask));
+        Thread.ofVirtual().start(() -> new Consumer(backendClient).startTimeout(2000, botTask));
     }
 
     @Override

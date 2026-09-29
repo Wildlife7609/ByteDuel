@@ -3,9 +3,8 @@ package org.kob.backend.consumer;
 import org.kob.backend.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -19,6 +18,9 @@ import org.kob.backend.pojo.Bot;
 import org.kob.backend.pojo.Player;
 import org.kob.backend.utils.JwtUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
     @Autowired
@@ -30,10 +32,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private RestTemplate restTemplate;
+    @Qualifier("matchingClient") // 有两个 RestClient，按名字指定用哪一个
+    private RestClient matchingClient;
 
-    private static final String addPlayerUrl = "http://127.0.0.1:8081/player/add/";
-    private static final String removePlayerUrl = "http://127.0.0.1:8081/player/remove/";
 
     @Override // 相当于 @OnOpen（建立连接）
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -80,10 +81,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
             }
         }
         player.setBot(bot);
-        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-        data.add("user_id", userId.toString());
-        data.add("rating", player.getUser().getRating().toString());
-        restTemplate.postForObject(addPlayerUrl, data, String.class);
+        Map<String, Integer> data = new HashMap<>();
+        data.put("user_id", userId);
+        data.put("rating", player.getUser().getRating());
+        matchingClient.post().uri("/player/add/").body(data).retrieve().toBodilessEntity();
 
     }
 
@@ -96,9 +97,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     private void removeFromMatchingPool(Integer userId) {
-        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-        data.add("user_id", userId.toString());
-        restTemplate.postForObject(removePlayerUrl, data, String.class);
+        Map<String, Integer> data = new HashMap<>();
+        data.put("user_id", userId);
+        matchingClient.post().uri("/player/remove/").body(data).retrieve().toBodilessEntity();
     }
 
     private void move(Integer userId, Integer direction) {

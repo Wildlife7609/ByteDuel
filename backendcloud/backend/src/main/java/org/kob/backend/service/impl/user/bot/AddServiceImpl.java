@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.kob.backend.mapper.BotMapper;
 import org.kob.backend.pojo.Bot;
 import org.kob.backend.pojo.User;
+import org.kob.backend.service.impl.utils.BotCodeChecker;
 import org.kob.backend.service.impl.utils.UserDetailsImpl;
 import org.kob.backend.service.user.bot.AddService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import java.util.*;
 public class AddServiceImpl implements AddService {
     @Autowired
     private BotMapper botMapper;
+    @Autowired
+    private BotCodeChecker botCodeChecker;
 
     @Override
     public Map<String, String> addBot(Map<String, String> data) {
@@ -58,6 +61,12 @@ public class AddServiceImpl implements AddService {
         queryWrapper.eq("user_id", user.getId());
         if (botMapper.selectCount(queryWrapper) >= 10) {
             map.put("error_message", "每个用户最多只能创建10个Bot！");
+            return map;
+        }
+        // 编译比较耗时，放在其他检查都通过之后
+        String compileError = botCodeChecker.check(content);
+        if (compileError != null) {
+            map.put("error_message", compileError);
             return map;
         }
 
