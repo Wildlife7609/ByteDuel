@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MatchingServieImpl implements MatchingService {
+public class MatchingServiceImpl implements MatchingService {
     @Autowired
     private MatchingPool matchingPool;
 

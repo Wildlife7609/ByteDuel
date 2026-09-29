@@ -84,7 +84,11 @@ public class MatchingPool extends Thread {
         Map<String, Integer> data = new HashMap<>();
         data.put("a_id", a.getUserId());
         data.put("b_id", b.getUserId());
-        backendClient.post().uri("/pk/start/game/").body(data).retrieve().toBodilessEntity();
+        try {
+            backendClient.post().uri("/pk/start/game/").body(data).retrieve().toBodilessEntity();
+        } catch (Exception e) {
+            e.printStackTrace(); // 通知 backend 失败，不能让匹配线程退出
+        }
     }
 
     @Override

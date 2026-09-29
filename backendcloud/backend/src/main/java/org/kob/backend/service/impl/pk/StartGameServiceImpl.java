@@ -1,6 +1,8 @@
 package org.kob.backend.service.impl.pk;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.kob.backend.consumer.Game;
 import org.kob.backend.consumer.PlayerManager;
@@ -26,15 +28,38 @@ public class StartGameServiceImpl implements StartGameService {
     @Autowired
     @Qualifier("botRunningClient") // 有两个 RestClient，按名字指定用哪一个
     private RestClient botRunningClient;
+    @Autowired
+    @Qualifier("matchingClient")
+    private RestClient matchingClient;
+
 
     @Override
     public String startGame(Integer aId, Integer bId) {
         System.out.println("StartGameServiceImpl startGame "  + aId + " " + bId);
         Player a = playerManager.getPlayer(aId);
         Player b = playerManager.getPlayer(bId);
-        if (a == null || b == null) return "player offline"; // 配对期间有人掉线
+        if (a == null || b == null) {
+            if (a != null) {
+                addPlayerBackToMatchingPool(a);
+            }
+            if (b != null) {
+                addPlayerBackToMatchingPool(b);
+            }
+            return "player offline"; // 配对期间有人掉线
+        }
         startGame(a, b);
         return "start game success";
+    }
+
+    private void addPlayerBackToMatchingPool(Player player) {
+        Map<String, Integer> data = new HashMap<>();
+        data.put("user_id", player.getUser().getId());
+        data.put("rating", player.getUser().getRating());
+        try {
+            matchingClient.post().uri("/player/add/").body(data).retrieve().toBodilessEntity();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void startGame(Player a, Player b) {
