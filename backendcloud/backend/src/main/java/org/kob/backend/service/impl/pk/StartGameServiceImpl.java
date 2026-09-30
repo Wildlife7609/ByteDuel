@@ -7,6 +7,7 @@ import java.util.Map;
 import org.kob.backend.consumer.Game;
 import org.kob.backend.consumer.PlayerManager;
 import org.kob.backend.mapper.RecordMapper;
+import org.kob.backend.mapper.UserMapper;
 import org.kob.backend.pojo.Player;
 import org.kob.backend.service.pk.StartGameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ public class StartGameServiceImpl implements StartGameService {
     private ObjectMapper objectMapper;
     @Autowired
     private RecordMapper recordMapper;
+    @Autowired
+    private UserMapper userMapper;
     @Autowired
     @Qualifier("botRunningClient") // 有两个 RestClient，按名字指定用哪一个
     private RestClient botRunningClient;
@@ -63,7 +66,7 @@ public class StartGameServiceImpl implements StartGameService {
     }
 
     private void startGame(Player a, Player b) {
-        Game game = new Game(15, 14, 20, a, b, recordMapper, botRunningClient);
+        Game game = new Game(15, 14, 20, a, b, recordMapper, botRunningClient, userMapper);
         game.createMap();
 
         a.setGame(game);

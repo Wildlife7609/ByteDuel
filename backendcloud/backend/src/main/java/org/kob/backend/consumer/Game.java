@@ -4,9 +4,12 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.kob.backend.mapper.RecordMapper;
+import org.kob.backend.mapper.UserMapper;
+
 import org.kob.backend.pojo.Player;
 import org.kob.backend.pojo.Record;
 import org.kob.backend.pojo.Cell;
+import org.kob.backend.pojo.User;
 
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
@@ -28,11 +31,12 @@ public class Game extends Thread {
     private String loser = ""; // "all": 平局, "A" : A 输, "B" : B 输
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final RecordMapper recordMapper; // Game 是 new 出来的，不能 @Autowired，由 StartGameServiceImpl 传入
-    private final RestClient botRunningClient; // Game 是 new 出来的，不能 @Autowired，由 StartGameServiceImpl 传入
+    private final RecordMapper recordMapper; // 以下都是Game 是 new 出来的，不能 @Autowired，由 StartGameServiceImpl 传入
+    private final RestClient botRunningClient; 
+    private final UserMapper userMapper; // 
 
     public Game(Integer rows, Integer cols, Integer inner_walls_count, Player p1, Player p2,
-            RecordMapper recordMapper, RestClient botRunningClient) {
+            RecordMapper recordMapper, RestClient botRunningClient, UserMapper userMapper) {
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_count = inner_walls_count;
@@ -40,6 +44,7 @@ public class Game extends Thread {
         this.p1 = p1;
         this.p2 = p2;
         this.recordMapper = recordMapper;
+        this.userMapper = userMapper;
         this.botRunningClient = botRunningClient;
         createMap();
     }
@@ -117,7 +122,29 @@ public class Game extends Thread {
         return sb.toString();
     }
 
+    private void updateUserRating(Player player, Integer rating) {
+        player.getUser().setRating(rating);
+        User user = new User();
+        user.setId(player.getUser().getId());
+        user.setRating(rating);
+        userMapper.updateById(user);
+    }
+
     private void saveToDatabase() {
+        Integer ratingA = p1.getUser().getRating();
+        Integer ratingB = p2.getUser().getRating();
+        if (!loser.equals("all")) {
+            if (loser.equals("A")) {
+                ratingA -= 2;
+                ratingB += 5;
+            } else {
+                ratingA += 5;
+                ratingB -= 2;
+            }
+            updateUserRating(p1, ratingA);
+            updateUserRating(p2, ratingB);
+        }
+
         Record record = new Record(
                 null,
                 p1.getUser().getId(), p1.getSx(), p1.getSy(),
