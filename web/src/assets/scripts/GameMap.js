@@ -44,12 +44,14 @@ export class GameMap extends AcGameObject {
             const b_steps = recordStore.b_steps;
             const loser = recordStore.loser;
             const [snake0, snake1] = this.snakes;
+            recordStore.updateIsFinished(false);
             let k = 0;
             this.record_interval_id = setInterval(() => {
                 if (k >= a_steps.length) {
                     if (loser === "all" || loser === "A") snake0.status = "die";
                     if (loser === "all" || loser === "B") snake1.status = "die";
                     clearInterval(this.record_interval_id);
+                    recordStore.updateIsFinished(true);
                 } else {
                     snake0.set_direction(parseInt(a_steps[k]));
                     snake1.set_direction(parseInt(b_steps[k]));
