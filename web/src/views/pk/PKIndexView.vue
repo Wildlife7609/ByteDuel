@@ -2,16 +2,19 @@
 import PlayGround from '@/components/PlayGround.vue'
 import { usePkStore } from '@/stores/pk';
 import { useUserStore } from '@/stores/user';
+import { useRecordStore } from '@/stores/record';
 import { onMounted, onUnmounted } from 'vue';
 import MatchGround from '@/components/MatchGround.vue';
 import ResultBoard from '@/components/ResultBoard.vue';
 
 const pkStore = usePkStore();
 const userStore = useUserStore();
+const recordStore = useRecordStore();
 const socketUrl = `ws://localhost:8080/websocket/${userStore.token}`;
 let socket = null;
 
 onMounted(() => {
+    recordStore.updateIsRecord(false);
     socket = new WebSocket(socketUrl);
     socket.onopen = () => {
         console.log("连接成功");

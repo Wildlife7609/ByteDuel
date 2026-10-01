@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/account/token/", "/user/account/register/", "/error", "/websocket/**")
+                        .requestMatchers("/user/account/token/", "/user/account/register/", "/record/getlist/", "/error", "/websocket/**")
                         .permitAll()
                         .requestMatchers("/pk/start/game/", "/pk/receive/bot/move/").access((authentication, context) -> {
                             return new AuthorizationDecision(

@@ -2,6 +2,7 @@ import AcGameObject from "./ACGameObject.js";
 import { Wall } from "./Wall.js";
 import { Snake } from "./Snake.js";
 import { usePkStore } from "@/stores/pk.js";
+import { useRecordStore } from "@/stores/record.js";
 
 export class GameMap extends AcGameObject {
     constructor(ctx, parent, gameObject) {
@@ -11,20 +12,20 @@ export class GameMap extends AcGameObject {
         this.gameObject = gameObject;
         this.L = 0; //绝对像素
 
-        this.rows = 15;
-        this.cols = 14;
-
-        this.inner_walls_count = 20;
+        this.rows = gameObject.map.length;
+        this.cols = gameObject.map[0].length;
         this.walls = [];
 
         this.snakes = [
             new Snake({ id: 0, color: "#EC4899", r: gameObject.a_sx, c: gameObject.a_sy }, this),
             new Snake({ id: 1, color: "#06B6D4", r: gameObject.b_sx, c: gameObject.b_sy }, this),
         ]
+
+        this.record_interval_id = null;
     }
 
     create_walls() {
-        const g = this.gameObject?.map;
+        const g = this.gameObject.map;
         if (!g) return;
 
         for (let r = 0; r < this.rows; r++) {
@@ -37,24 +38,45 @@ export class GameMap extends AcGameObject {
     }
 
     add_listening_event() {
-        this.ctx.canvas.focus();
-        const pkStore = usePkStore();
-        if (pkStore.selectedBotId !== -1) return; // Bot 出战，不发送键盘操作
-        this.ctx.canvas.addEventListener("keydown", e => {
-            let d = -1;
-            if (e.key === "w") d = 0;
-            else if (e.key === "d") d = 1;
-            else if (e.key === "s") d = 2;
-            else if (e.key === "a") d = 3;
+        const recordStore = useRecordStore();
+        if (recordStore.is_record) {
+            const a_steps = recordStore.a_steps;
+            const b_steps = recordStore.b_steps;
+            const loser = recordStore.loser;
+            const [snake0, snake1] = this.snakes;
+            let k = 0;
+            this.record_interval_id = setInterval(() => {
+                if (k >= a_steps.length) {
+                    if (loser === "all" || loser === "A") snake0.status = "die";
+                    if (loser === "all" || loser === "B") snake1.status = "die";
+                    clearInterval(this.record_interval_id);
+                } else {
+                    snake0.set_direction(parseInt(a_steps[k]));
+                    snake1.set_direction(parseInt(b_steps[k]));
+                }
+                k++;
+            }, 300); // 蛇速 5 格/秒，一步约 200ms，300ms 留点余量
+        }
+        else {
+            this.ctx.canvas.focus();
+            const pkStore = usePkStore();
+            if (pkStore.selectedBotId !== -1) return; // Bot 出战，不发送键盘操作
+            this.ctx.canvas.addEventListener("keydown", e => {
+                let d = -1;
+                if (e.key === "w") d = 0;
+                else if (e.key === "d") d = 1;
+                else if (e.key === "s") d = 2;
+                else if (e.key === "a") d = 3;
 
-            if (d >= 0) {
-                const pkStore = usePkStore();
-                pkStore.socket.send(JSON.stringify({
-                    event: "move",
-                    direction: d,
-                }));
-            }
-        });
+                if (d >= 0) {
+                    pkStore.socket.send(JSON.stringify({
+                        event: "move",
+                        direction: d,
+                    }));
+                }
+            });
+        }
+
     }
 
     start() {
@@ -69,6 +91,7 @@ export class GameMap extends AcGameObject {
         for (let snake of this.snakes) {
             snake.destroy();
         }
+        clearInterval(this.record_interval_id);
     }
 
     update_size() {
@@ -78,9 +101,8 @@ export class GameMap extends AcGameObject {
     }
 
     check_valid(cell) { // 检查蛇是否撞墙或撞到自己或撞到对方
-        for (const wall of this.walls) {
-            if (wall.r === cell.r && wall.c === cell.c) return false;
-        }
+        if (this.gameObject.map[cell.r][cell.c]) return false;
+
         for (const snake of this.snakes) {
             let k = snake.cells.length;
             if (!snake.check_tail_increasing()) { // 蛇尾巴不增长的话，就不用检查蛇尾巴了

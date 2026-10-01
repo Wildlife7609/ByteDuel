@@ -4,10 +4,10 @@ import { ref } from 'vue';
 import router from '@/router';
 import axios from 'axios';
 
-let username = ref("");
-let password = ref("");
-let confirmedPassword = ref("");
-let error_message = ref("");
+const username = ref("");
+const password = ref("");
+const confirmedPassword = ref("");
+const error_message = ref("");
 
 const register = async () => {
     error_message.value = "";

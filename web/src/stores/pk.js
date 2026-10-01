@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, shallowRef } from 'vue'
 import { defineStore } from 'pinia'
 
 export const usePkStore = defineStore('pk', () => {
@@ -9,7 +9,7 @@ export const usePkStore = defineStore('pk', () => {
     const opponentPhoto = ref('https://api.dicebear.com/10.x/bottts/svg?seed=opponent_photo');
     const opponentSelectedBotId = ref(-1);
     const gameObject = ref(null);
-    const gameMap = ref(null);
+    const gameMap = shallowRef(null);
     const loser = ref("none"); // "all", "A", "B", "none"
 
     const updateSocket = (newSocket) => {
@@ -21,6 +21,7 @@ export const usePkStore = defineStore('pk', () => {
         opponentPhoto.value = 'https://api.dicebear.com/10.x/bottts/svg?seed=opponent_photo';
         opponentSelectedBotId.value = -1;
         gameObject.value = null;
+        loser.value = "none";
     }
 
     const updateGameObject = (game) => {

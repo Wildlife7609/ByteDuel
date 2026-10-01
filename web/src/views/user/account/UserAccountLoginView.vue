@@ -6,9 +6,9 @@ import router from '@/router';
 
 const userStore = useUserStore();
 
-let username = ref("");
-let password = ref("");
-let error_message = ref("");
+const username = ref("");
+const password = ref("");
+const error_message = ref("");
 
 const login = async () => {
     error_message.value = "";
