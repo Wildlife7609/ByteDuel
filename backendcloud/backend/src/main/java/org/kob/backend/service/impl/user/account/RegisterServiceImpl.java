@@ -53,7 +53,7 @@ public class RegisterServiceImpl implements RegisterService {
         }
         String encodePassword = passwordEncoder.encode(password);
         String photo = "https://api.dicebear.com/10.x/bottts/svg?seed=" + username;
-        User user = new User(null, username, encodePassword, photo, 1500);
+        User user = new User(null, username, encodePassword, photo, 1500, 0, 0, 0);
         userMapper.insert(user);
         map.put("error_message", "success");
         return map;

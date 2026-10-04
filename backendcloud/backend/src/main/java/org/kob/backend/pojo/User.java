@@ -17,4 +17,7 @@ public class User {
     private String password;
     private String photo;
     private Integer rating;
+    private Integer winCount;
+    private Integer loseCount;
+    private Integer drawCount;
 }

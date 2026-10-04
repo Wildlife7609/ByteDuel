@@ -17,7 +17,8 @@ const PAGE_SIZE = 10
 const totalPages = computed(() => Math.ceil(totalRecords.value / PAGE_SIZE))
 const loaded = ref(false) // 首次请求返回前不显示空状态，避免闪一下"暂无对局记录"
 
-// 多页时最后一页不满，用隐藏行补齐，保持表格高度不变，分页条不会跳动
+// 多页时最后一页不满，用一行"没有更多记录了"占满剩余高度，保持表格高度不变，分页条不会跳动
+const ROW_HEIGHT = 57 // 真实行高：头像 40px + 上下内边距 16px + 边框 1px
 const emptyRows = computed(() => totalPages.value > 1 ? PAGE_SIZE - records.value.length : 0)
 
 const pages = computed(() => {
@@ -139,8 +140,10 @@ pull_page(currentPage.value);
                             @click="open_record(item)">查看录像</button>
                     </td>
                 </tr>
-                <tr v-for="i in emptyRows" :key="'empty-' + i" class="placeholder-row">
-                    <td colspan="4">&nbsp;</td>
+                <tr v-if="emptyRows > 0" class="no-more-row">
+                    <td colspan="4" class="text-muted" :style="{ height: emptyRows * ROW_HEIGHT + 'px' }">
+                        没有更多记录了
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -167,11 +170,4 @@ pull_page(currentPage.value);
 </template>
 
 <style scoped>
-.placeholder-row {
-    visibility: hidden; /* 不可见但仍占位 */
-}
-
-.placeholder-row td {
-    height: 57px; /* 与真实行等高：头像 40px + 上下内边距 16px + 边框 1px */
-}
 </style>

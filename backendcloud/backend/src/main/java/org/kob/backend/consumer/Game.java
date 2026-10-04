@@ -3,6 +3,7 @@ package org.kob.backend.consumer;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.kob.backend.mapper.RecordMapper;
 import org.kob.backend.mapper.UserMapper;
 
@@ -130,6 +131,14 @@ public class Game extends Thread {
         userMapper.updateById(user);
     }
 
+    // 让数据库自增，不依赖开局时加载的用户数据；column 只由本类传入固定列名
+    private void incrementResultCount(Player player, String column) {
+        UpdateWrapper<User> wrapper = new UpdateWrapper<>();
+        wrapper.eq("id", player.getUser().getId())
+                .setSql(column + " = " + column + " + 1");
+        userMapper.update(wrapper);
+    }
+
     private void saveToDatabase() {
         Integer ratingA = p1.getUser().getRating();
         Integer ratingB = p2.getUser().getRating();
@@ -143,6 +152,17 @@ public class Game extends Thread {
             }
             updateUserRating(p1, ratingA);
             updateUserRating(p2, ratingB);
+        }
+
+        if (loser.equals("all")) {
+            incrementResultCount(p1, "draw_count");
+            incrementResultCount(p2, "draw_count");
+        } else if (loser.equals("A")) {
+            incrementResultCount(p1, "lose_count");
+            incrementResultCount(p2, "win_count");
+        } else {
+            incrementResultCount(p1, "win_count");
+            incrementResultCount(p2, "lose_count");
         }
 
         Record record = new Record(
