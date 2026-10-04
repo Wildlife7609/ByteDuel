@@ -54,6 +54,12 @@ const click_match_btn = () => {
                             {{ bot.title }}
                         </option>
                     </select>
+                    <!-- 亲自出战时的操作提示 -->
+                    <div v-if="pkStore.selectedBotId === -1" class="play-tip">
+                        <div><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> 控制上 / 左 / 下 / 右</div>
+                        <div>每回合 5 秒内必须操作，超时判负</div>
+                        <div>按键没反应：先点一下地图，并切换到英文输入法</div>
+                    </div>
                 </div>
                 <button @click="click_match_btn" type="button" class="btn btn-warning btn-lg match-btn">
                     {{ matchBtnText }}
@@ -118,6 +124,19 @@ div.user-username {
 .user-select-bot {
     width: 70%;
     margin: 1.5rem auto;
+}
+
+.play-tip {
+    margin-top: 0.8rem;
+    font-size: 13px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.play-tip kbd {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
 }
 
 .match-btn {

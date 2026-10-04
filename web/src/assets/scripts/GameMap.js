@@ -64,11 +64,12 @@ export class GameMap extends AcGameObject {
             const pkStore = usePkStore();
             if (pkStore.selectedBotId !== -1) return; // Bot 出战，不发送键盘操作
             this.ctx.canvas.addEventListener("keydown", e => {
+                const key = e.key.toLowerCase(); // 开着大写锁定时按键也能生效
                 let d = -1;
-                if (e.key === "w") d = 0;
-                else if (e.key === "d") d = 1;
-                else if (e.key === "s") d = 2;
-                else if (e.key === "a") d = 3;
+                if (key === "w") d = 0;
+                else if (key === "d") d = 1;
+                else if (key === "s") d = 2;
+                else if (key === "a") d = 3;
 
                 if (d >= 0) {
                     pkStore.socket.send(JSON.stringify({

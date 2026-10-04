@@ -4,6 +4,7 @@ import { ref, computed } from 'vue';
 import { Modal } from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import axios from 'axios';
 import BotCodeEditor from '@/components/BotCodeEditor.vue';
+import { BOT_TEMPLATE } from '@/utils/botTemplate';
 
 const userStore = useUserStore();
 const bots = ref([]);
@@ -34,7 +35,7 @@ const openCreateModal = () => {
         bot_id: null,
         title: "",
         description: "",
-        content: "",
+        content: BOT_TEMPLATE, // 创建时默认填入代码模板
     };
     Modal.getOrCreateInstance("#bot-modal").show();
 }
