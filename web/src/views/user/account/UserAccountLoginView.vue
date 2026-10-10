@@ -22,6 +22,8 @@ const login = async () => {
     } catch (error) {
         if (error.response && error.response.status === 403) {
             error_message.value = "用户名或密码错误";
+        } else if (error.response && error.response.status === 429) {
+            error_message.value = error.response.data.error_message; // 失败次数过多，提示要等多久
         } else {
             error_message.value = "服务器连接失败";
         }

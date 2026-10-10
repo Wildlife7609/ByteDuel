@@ -1,0 +1,29 @@
+# 两个环境变量由 docker-compose.yml 传入（在 .env 里设置）：
+#   线上：SITE_ADDRESS=域名，TLS=tls /certs/origin.pem /certs/origin.key（Cloudflare Origin 证书）
+#   本地测试：SITE_ADDRESS=:80，TLS 留空，只用 HTTP
+{$SITE_ADDRESS::80} {
+	{$TLS}
+
+	encode gzip
+
+	# /pk/ 下都是内部接口（开始对局、接收 Bot 的移动），只给服务之间调用，不允许从外部访问
+	@internal path /api/pk /api/pk/*
+	respond @internal 403
+
+	# API 转发给 backend，去掉 /api 前缀
+	handle_path /api/* {
+		reverse_proxy backend:8080
+	}
+
+	# 对局用的 WebSocket，Caddy 会自动处理连接升级
+	handle /websocket/* {
+		reverse_proxy backend:8080
+	}
+
+	# 其他请求都是前端页面；Vue 路由的路径（如 /ranklist/）没有对应文件，返回 index.html
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

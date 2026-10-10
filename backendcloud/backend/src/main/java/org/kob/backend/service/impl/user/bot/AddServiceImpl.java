@@ -30,6 +30,7 @@ public class AddServiceImpl implements AddService {
         String title = data.get("title");
         String description = data.get("description");
         String content = data.get("content");
+        String language = data.get("language");
 
         Map<String, String> map = new HashMap<>();
 
@@ -56,6 +57,10 @@ public class AddServiceImpl implements AddService {
             map.put("error_message", "内容长度不能大于10000");
             return map;
         }
+        if (language == null || !BotCodeChecker.LANGUAGES.contains(language)) {
+            map.put("error_message", "不支持的语言");
+            return map;
+        }
 
         QueryWrapper<Bot> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", user.getId());
@@ -64,7 +69,7 @@ public class AddServiceImpl implements AddService {
             return map;
         }
         // 编译比较耗时，放在其他检查都通过之后
-        String compileError = botCodeChecker.check(content);
+        String compileError = botCodeChecker.check(language, content);
         if (compileError != null) {
             map.put("error_message", compileError);
             return map;
@@ -77,6 +82,7 @@ public class AddServiceImpl implements AddService {
                 title,
                 description,
                 content,
+                language,
                 now,
                 now);
         botMapper.insert(bot);

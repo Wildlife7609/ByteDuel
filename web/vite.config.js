@@ -11,7 +11,18 @@ export default defineConfig({
     vueDevTools(),
   ],
   server: {
-    port: 5174 // 改成你想要的端口
+    port: 5174, // 改成你想要的端口
+    // 本地开发时把请求转发给 backend，和线上 Caddy 的转发规则一致
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/websocket': {
+        target: 'http://localhost:8080',
+        ws: true,
+      },
+    },
   },
   resolve: {
     alias: {

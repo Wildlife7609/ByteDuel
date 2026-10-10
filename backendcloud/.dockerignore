@@ -1,0 +1,7 @@
+# 本地私密配置绝不能打进镜像：它的优先级高于环境变量传入的配置，会覆盖线上的数据库密码和 JWT 密钥
+**/application-local.properties
+**/target
+**/.idea
+**/*.iml
+sandbox
+db

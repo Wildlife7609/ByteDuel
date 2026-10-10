@@ -11,16 +11,17 @@ import 'ace-builds/src-noconflict/theme-chrome';
 import 'ace-builds/src-noconflict/theme-monokai';
 import 'ace-builds/src-noconflict/theme-dracula';
 import 'ace-builds/src-noconflict/ext-language_tools';
-import { BOT_TEMPLATE } from '@/utils/botTemplate';
+import { LANGUAGES, DEFAULT_LANGUAGE, BOT_TEMPLATES } from '@/utils/botTemplate';
 ace.config.set(
     "basePath",
     "https://cdn.jsdelivr.net/npm/ace-builds@" + ace.version + "/src-noconflict/"
 );
-// 支持 v-model 双向绑定
+// 支持 v-model 绑定代码，v-model:language 绑定语言
 const content = defineModel({ default: '' });
+const language = defineModel('language', { default: DEFAULT_LANGUAGE });
 const wrapSwitchId = useId();
 const completeSwitchId = useId();
-const editorLang = ref("java"); // 后端只编译 Java，默认用 Java 高亮
+const editorMode = computed(() => LANGUAGES.find(lang => lang.value === language.value)?.mode ?? "text");
 const editorSettings = ref({
     theme: localStorage.getItem("bot_editor_theme") || "textmate",
     fontSize: Number(localStorage.getItem("bot_editor_font_size")) || 16,
@@ -44,10 +45,22 @@ const editorOptions = computed(() => ({
     scrollPastEnd: 0.5,
 }));
 const resetCode = () => {
-    if (content.value === BOT_TEMPLATE) return;
+    const template = BOT_TEMPLATES[language.value];
+    if (content.value === template) return;
     if (confirm("确定要将编辑器中的代码恢复为默认模板吗？当前代码将会丢失。")) {
-        content.value = BOT_TEMPLATE;
+        content.value = template;
     }
+};
+// 切换语言时换成新语言的模板；代码改过的话先确认，取消就把下拉框改回去
+const changeLanguage = (event) => {
+    const newLanguage = event.target.value;
+    const untouched = !content.value.trim() || Object.values(BOT_TEMPLATES).includes(content.value);
+    if (!untouched && !confirm("切换语言会把代码替换为新语言的模板，当前代码将会丢失，确定吗？")) {
+        event.target.value = language.value;
+        return;
+    }
+    language.value = newLanguage;
+    content.value = BOT_TEMPLATES[newLanguage];
 };
 </script>
 <template>
@@ -61,11 +74,9 @@ const resetCode = () => {
             </div>
             <div class="d-flex gap-2 align-items-center">
                 <!-- 语言切换 -->
-                <select v-model="editorLang" class="form-select form-select-sm" style="width: 105px;">
-                    <option value="c_cpp">C++</option>
-                    <option value="java">Java</option>
-                    <option value="python">Python</option>
-                    <option value="golang">Go</option>
+                <select :value="language" @change="changeLanguage" class="form-select form-select-sm"
+                    style="width: 105px;">
+                    <option v-for="lang in LANGUAGES" :key="lang.value" :value="lang.value">{{ lang.label }}</option>
                 </select>
                 <!-- 设置悬浮面板 -->
                 <div class="dropdown">
@@ -121,7 +132,7 @@ const resetCode = () => {
                 </button>
             </div>
         </div>
-        <VAceEditor v-model:value="content" :lang="editorLang" :theme="editorSettings.theme" style="height: 320px"
+        <VAceEditor v-model:value="content" :lang="editorMode" :theme="editorSettings.theme" style="height: 320px"
             :options="editorOptions" />
     </div>
 </template>

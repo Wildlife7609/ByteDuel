@@ -15,7 +15,8 @@ axios.interceptors.request.use(config => {
     throw error;
 });
 
-axios.defaults.baseURL = "http://localhost:8080";
+// 和页面同域名，由 Caddy（线上）或 Vite（本地开发）把 /api 转发给 backend
+axios.defaults.baseURL = "/api";
 
 // 消除 Bootstrap Modal 关闭时 Chrome 报 Blocked aria-hidden 警告
 document.addEventListener('hide.bs.modal', () => {

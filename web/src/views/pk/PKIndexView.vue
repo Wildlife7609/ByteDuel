@@ -10,7 +10,8 @@ import ResultBoard from '@/components/ResultBoard.vue';
 const pkStore = usePkStore();
 const userStore = useUserStore();
 const recordStore = useRecordStore();
-const socketUrl = `ws://localhost:8080/websocket/${userStore.token}`;
+// 和页面同域名；HTTPS 页面必须用 wss
+const socketUrl = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/websocket/${userStore.token}`;
 let socket = null;
 
 onMounted(() => {

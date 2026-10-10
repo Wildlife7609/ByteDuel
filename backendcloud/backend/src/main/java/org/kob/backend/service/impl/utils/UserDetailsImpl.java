@@ -17,6 +17,11 @@ import java.util.List;
 @NoArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private User user;
+    private boolean accountNonLocked = true; // 登录失败次数过多时为 false，见 LoginAttemptLimiter
+
+    public UserDetailsImpl(User user) {
+        this.user = user;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -31,5 +36,11 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public @NonNull String getUsername() {
         return user.getUsername();
+    }
+
+    // 返回 false 时，Spring Security 在校验密码之前就拒绝登录，抛出 LockedException
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
     }
 }

@@ -7,13 +7,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-        // 只允许本机（backend）调用匹配接口
-        private static final IpAddressMatcher LOCALHOST = new IpAddressMatcher("127.0.0.1");
+        private final InternalAccess internalAccess;
+
+        public SecurityConfig(InternalAccess internalAccess) {
+                this.internalAccess = internalAccess;
+        }
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -22,9 +24,10 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
+                                                // 匹配接口只给 backend 调用
                                                 .requestMatchers("/player/add/", "/player/remove/")
                                                 .access((authentication, context) -> new AuthorizationDecision(
-                                                                LOCALHOST.matches(context.getRequest())))
+                                                                internalAccess.isAllowed(context.getRequest())))
                                                 .anyRequest().denyAll());
                 return http.build();
         }

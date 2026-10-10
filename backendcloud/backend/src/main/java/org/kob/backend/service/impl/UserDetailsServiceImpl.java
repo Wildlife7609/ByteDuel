@@ -3,6 +3,7 @@ package org.kob.backend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.kob.backend.mapper.UserMapper;
 import org.kob.backend.pojo.User;
+import org.kob.backend.service.impl.utils.LoginAttemptLimiter;
 import org.kob.backend.service.impl.utils.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private LoginAttemptLimiter loginAttemptLimiter;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -24,6 +27,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("用户不存在");
         }
-        return new UserDetailsImpl(user);
+        return new UserDetailsImpl(user, !loginAttemptLimiter.isLocked(username));
     }
 }

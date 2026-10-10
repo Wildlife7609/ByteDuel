@@ -46,6 +46,7 @@ public class UpdateServiceImpl implements UpdateService {
         String title = data.get("title");
         String description = data.get("description");
         String content = data.get("content");
+        String language = data.get("language");
 
         if (title == null || title.isBlank()) {
             map.put("error_message", "标题不能为空");
@@ -70,7 +71,11 @@ public class UpdateServiceImpl implements UpdateService {
             map.put("error_message", "内容长度不能大于10000");
             return map;
         }
-        String compileError = botCodeChecker.check(content);
+        if (language == null || !BotCodeChecker.LANGUAGES.contains(language)) {
+            map.put("error_message", "不支持的语言");
+            return map;
+        }
+        String compileError = botCodeChecker.check(language, content);
         if (compileError != null) {
             map.put("error_message", compileError);
             return map;
@@ -81,6 +86,7 @@ public class UpdateServiceImpl implements UpdateService {
                 title,
                 description,
                 content,
+                language,
                 bot.getCreateTime(),
                 new Date());
 

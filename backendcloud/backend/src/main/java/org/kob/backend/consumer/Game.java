@@ -93,18 +93,47 @@ public class Game extends Thread {
             + you.getSx() + "#" + you.getSy() + "#(" + getStepsString(you) + ")";
     }
 
+    private boolean hasBotCode(Player player) {
+        return player.getBot() != null && player.getBot().getContent() != null
+                && !player.getBot().getContent().isEmpty();
+    }
+
     private void sendBotCode(Player player) {
-        if (player.getBot() == null) return;
-        String botCode = player.getBot().getContent();
-        if (botCode == null || botCode.length() == 0) return;
+        if (!hasBotCode(player)) return;
         Map<String, Object> data = new HashMap<>();
         data.put("user_id", player.getUser().getId());
-        data.put("bot_code", botCode);
+        data.put("bot_language", player.getBot().getLanguage());
+        data.put("bot_code", player.getBot().getContent());
         data.put("input", getInput(player));
         try {
             botRunningClient.post().uri("/bot/add/").body(data).retrieve().toBodilessEntity();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // 对局开始前让 botrunningsystem 把双方的 Bot 编译好。服务重启后编译缓存会丢失，
+    // Go 编译要好几秒，放到第一回合现场编译会超过每回合 5 秒的限制
+    private void prepareBots() {
+        Thread t1 = Thread.ofVirtual().start(() -> prepareBot(p1)); // 两个 Bot 同时编译
+        Thread t2 = Thread.ofVirtual().start(() -> prepareBot(p2));
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void prepareBot(Player player) {
+        if (!hasBotCode(player)) return;
+        Map<String, String> data = new HashMap<>();
+        data.put("bot_language", player.getBot().getLanguage());
+        data.put("bot_code", player.getBot().getContent());
+        try {
+            botRunningClient.post().uri("/bot/compile/").body(data).retrieve().toBodilessEntity();
+        } catch (Exception e) {
+            e.printStackTrace(); // 预热失败不影响开局，最多第一回合现场编译
         }
     }
 
@@ -247,6 +276,7 @@ public class Game extends Thread {
 
     @Override
     public void run() {
+        prepareBots();
         for (int i = 0; i < 1000; i++) {
             if (nextStep()) {
                 judge();

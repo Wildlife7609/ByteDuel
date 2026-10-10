@@ -15,17 +15,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
-    private static final IpAddressMatcher LOCALHOST = new IpAddressMatcher("127.0.0.1");
+    private final InternalAccess internalAccess;
 
-    public SecurityConfig(JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter) {
+    public SecurityConfig(JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter, InternalAccess internalAccess) {
         this.jwtAuthenticationTokenFilter = jwtAuthenticationTokenFilter;
+        this.internalAccess = internalAccess;
     }
 
     @Bean
@@ -42,10 +42,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/user/account/token/", "/user/account/register/", "/record/getlist/", "/ranklist/getlist/", "/error", "/websocket/**")
                         .permitAll()
-                        .requestMatchers("/pk/start/game/", "/pk/receive/bot/move/").access((authentication, context) -> {
-                            return new AuthorizationDecision(
-                                    LOCALHOST.matches(context.getRequest()));
-                        })
+                        .requestMatchers("/pk/start/game/", "/pk/receive/bot/move/").access((authentication, context) ->
+                                new AuthorizationDecision(internalAccess.isAllowed(context.getRequest())))
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
                         .anyRequest().authenticated());
 

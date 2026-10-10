@@ -4,7 +4,7 @@ import { ref, computed } from 'vue';
 import { Modal } from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import axios from 'axios';
 import BotCodeEditor from '@/components/BotCodeEditor.vue';
-import { BOT_TEMPLATE } from '@/utils/botTemplate';
+import { LANGUAGES, DEFAULT_LANGUAGE, BOT_TEMPLATES } from '@/utils/botTemplate';
 
 const userStore = useUserStore();
 const bots = ref([]);
@@ -21,7 +21,8 @@ const refresh_bots = async () => {
 refresh_bots();
 
 // 2. 统一 Bot 模态框表单与状态（创建与更新公用）
-const botForm = ref({ bot_id: null, title: "", description: "", content: "" });
+const botForm = ref({ bot_id: null, title: "", description: "", content: "", language: DEFAULT_LANGUAGE });
+const languageLabel = (value) => LANGUAGES.find(lang => lang.value === value)?.label ?? value;
 const isUpdating = ref(false);
 const errorMessage = ref("");
 const isSubmitting = ref(false);
@@ -35,7 +36,8 @@ const openCreateModal = () => {
         bot_id: null,
         title: "",
         description: "",
-        content: BOT_TEMPLATE, // 创建时默认填入代码模板
+        content: BOT_TEMPLATES[DEFAULT_LANGUAGE], // 创建时默认填入代码模板
+        language: DEFAULT_LANGUAGE,
     };
     Modal.getOrCreateInstance("#bot-modal").show();
 }
@@ -49,6 +51,7 @@ const openUpdateModal = (bot) => {
         title: bot.title,
         description: bot.description,
         content: bot.content,
+        language: bot.language,
     };
     Modal.getOrCreateInstance("#bot-modal").show();
 }
@@ -84,7 +87,12 @@ const submitBotForm = async () => {
         const url = isUpdating.value ? "/user/bot/update/" : "/user/bot/add/";
         const payload = isUpdating.value
             ? { ...botForm.value }
-            : { title: botForm.value.title, description: botForm.value.description, content: botForm.value.content };
+            : {
+                title: botForm.value.title,
+                description: botForm.value.description,
+                content: botForm.value.content,
+                language: botForm.value.language,
+            };
 
         const res = await axios.post(url, payload);
         if (res.data.error_message === "success") {
@@ -151,7 +159,7 @@ const remove_bot = async (bot) => {
                                 :class="{ 'is-invalid': botForm.description.length > 300 }" id="bot-description"
                                 placeholder="请输入Bot描述（选填）"></textarea>
                         </div>
-                        <BotCodeEditor v-model="botForm.content" />
+                        <BotCodeEditor v-model="botForm.content" v-model:language="botForm.language" />
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -206,7 +214,10 @@ const remove_bot = async (bot) => {
                             </thead>
                             <tbody>
                                 <tr v-for="bot in bots" :key="bot.id">
-                                    <td class="text-break">{{ bot.title }}</td>
+                                    <td class="text-break">
+                                        {{ bot.title }}
+                                        <span class="badge text-bg-light border ms-1">{{ languageLabel(bot.language) }}</span>
+                                    </td>
                                     <td class="text-break text-muted">{{ bot.description }}</td>
                                     <td>{{ bot.createTime }}</td>
                                     <td>
