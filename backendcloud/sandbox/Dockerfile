@@ -3,7 +3,7 @@
 # 且端口只能绑定到本机，不能暴露到公网：
 #   docker build -t kob-sandbox backendcloud/sandbox
 #   docker run -d --name kob-sandbox --privileged --cgroupns=host --shm-size=256m -p 127.0.0.1:5050:5050 kob-sandbox
-FROM criyle/go-judge:v1.13.0
+FROM criyle/go-judge:v1.13.2
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends g++ openjdk-21-jdk-headless python3 golang-go \
@@ -18,3 +18,7 @@ RUN GOCACHE=/opt/gocache GOTOOLCHAIN=local CGO_ENABLED=0 go build \
 
 # 官方 mount.yaml 加上 /opt/gocache 的只读挂载
 COPY mount.yaml /opt/mount.yaml
+
+# 修正了 ARM64 问题的 seccomp 规则（原因见文件开头的注释）
+COPY seccomp.yaml /opt/seccomp.yaml
+CMD ["-seccomp-conf", "/opt/seccomp.yaml"]
