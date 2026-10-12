@@ -1,8 +1,11 @@
 # go-judge 的 seccomp 规则：来自 go-judge v1.13.2 内置的 seccomp/moby.yaml，只改了一处
 #   https://github.com/criyle/go-judge/blob/v1.13.2/seccomp/moby.yaml
-# 改动：在 aarch64 段落里加上 newfstatat
-#   官方规则只在 x86_64 段落里允许 newfstatat，而 ARM64 上读取文件信息（stat / lstat）都要用它，
-#   缺了它沙箱读取程序输出时会报 "lstat stdout: operation not permitted"（Oracle 的 ARM 服务器上实际遇到）
+# 改动：在 aarch64 段落里加上 fstatat
+#   ARM64 上读取文件信息（stat / lstat）用的是 79 号系统调用。Moby 的规则里它叫 newfstatat，
+#   但 go-judge 用来把名字翻译成编号的 go-seccomp-bpf 库，在 ARM64 的表里把它叫做 fstatat。
+#   官方的转换工具在 ARM64 表里找不到 newfstatat，就只把它放进了 x86_64 段落，
+#   结果 ARM64 上这个系统调用被禁止，沙箱读取程序输出时报 "lstat stdout: operation not permitted"
+#   （Oracle 的 ARM 服务器上实际遇到）。这里必须写 fstatat，写 newfstatat 在 ARM64 上不认识
 #   官方修复后可以删掉这个文件，以及 Dockerfile 里的 -seccomp-conf 参数，改回内置规则
 default_action: errno
 base:
@@ -453,11 +456,11 @@ architectures:
           - clock_gettime64
           - clock_nanosleep_time64
           - fadvise64
+          - fstatat
           - futex_time64
           - getrlimit
           - io_pgetevents_time64
           - mmap
-          - newfstatat
           - mq_timedreceive_time64
           - mq_timedsend_time64
           - ppoll_time64
