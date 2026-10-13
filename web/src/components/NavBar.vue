@@ -16,7 +16,7 @@ const logout = () => {
                 aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <router-link class="navbar-brand" :to="{ name: 'home' }">King of Bots</router-link>
+            <router-link class="navbar-brand" :to="{ name: 'home' }">ByteDuel</router-link>
             <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">

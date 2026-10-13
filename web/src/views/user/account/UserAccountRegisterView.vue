@@ -23,7 +23,11 @@ const register = async () => {
             error_message.value = res.data.error_message;
         }
     } catch (error) {
-        error_message.value = "服务器连接失败";
+        if (error.response && error.response.status === 429) {
+            error_message.value = "请求过于频繁，请稍后再试"; // 被 Cloudflare 限流
+        } else {
+            error_message.value = "服务器连接失败";
+        }
     }
 }
 

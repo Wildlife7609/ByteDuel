@@ -102,7 +102,11 @@ const submitBotForm = async () => {
             errorMessage.value = res.data.error_message;
         }
     } catch (error) {
-        errorMessage.value = "请求失败，请稍后重试";
+        if (error.response && error.response.status === 429) {
+            errorMessage.value = "请求过于频繁，请稍后再试"; // 被 Cloudflare 限流
+        } else {
+            errorMessage.value = "请求失败，请稍后重试";
+        }
     } finally {
         isSubmitting.value = false;
     }

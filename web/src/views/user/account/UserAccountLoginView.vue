@@ -23,7 +23,8 @@ const login = async () => {
         if (error.response && error.response.status === 403) {
             error_message.value = "用户名或密码错误";
         } else if (error.response && error.response.status === 429) {
-            error_message.value = error.response.data.error_message; // 失败次数过多，提示要等多久
+            // backend 锁定账号时返回带 error_message 的 JSON；被 Cloudflare 限流时返回的是 HTML，没有这个字段
+            error_message.value = error.response.data?.error_message || "请求过于频繁，请稍后再试";
         } else {
             error_message.value = "服务器连接失败";
         }
