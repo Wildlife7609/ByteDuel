@@ -6,6 +6,8 @@ export class Snake extends AcGameObject {
         super();
         this.id = info.id;
         this.color = info.color
+        this.username = info.username || ""; // 显示在蛇头上方
+        this.is_me = info.is_me || false; // 是不是当前登录用户的蛇
         this.gamemap = gamemap;
 
         this.cells = [new Cell(info.r, info.c)]; // 蛇的身体
@@ -181,5 +183,36 @@ export class Snake extends AcGameObject {
                 ctx.fill();
             }
         }
+
+        this.render_name();
+    }
+
+    render_name() { // 在蛇头上方显示用户名
+        if (!this.username) return;
+        const L = this.gamemap.L;
+        const ctx = this.gamemap.ctx;
+        let name = this.username.length > 12 ? this.username.slice(0, 12) + "…" : this.username;
+        if (this.is_me) name += "（你）";
+
+        ctx.save();
+        ctx.font = `bold ${Math.max(10, Math.round(L * 0.3))}px sans-serif`;
+        const w = ctx.measureText(name).width + L * 0.24;
+        const h = L * 0.42;
+        // 标签中心在蛇头上方；靠近地图左右边缘时往里收，不被画布裁掉
+        const head = this.cells[0];
+        const x = Math.min(Math.max(head.x * L, w / 2), ctx.canvas.width - w / 2);
+        const y = (head.y - 0.62) * L;
+
+        // 自己的蛇用琥珀色底、深色字，对手用半透明深色底、白字，草地背景上都看得清
+        ctx.fillStyle = this.is_me ? "#F59E0B" : "rgba(15, 23, 42, 0.65)";
+        ctx.beginPath();
+        ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2);
+        ctx.fill();
+
+        ctx.fillStyle = this.is_me ? "#1E293B" : "white";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(name, x, y);
+        ctx.restore();
     }
 }

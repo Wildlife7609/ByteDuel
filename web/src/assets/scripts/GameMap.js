@@ -3,6 +3,7 @@ import { Wall } from "./Wall.js";
 import { Snake } from "./Snake.js";
 import { usePkStore } from "@/stores/pk.js";
 import { useRecordStore } from "@/stores/record.js";
+import { useUserStore } from "@/stores/user.js";
 
 export class GameMap extends AcGameObject {
     constructor(ctx, parent, gameObject) {
@@ -16,9 +17,13 @@ export class GameMap extends AcGameObject {
         this.cols = gameObject.map[0].length;
         this.walls = [];
 
+        // 当前登录用户的蛇，标签上加“（你）”；store 里的 id 是字符串，a_id / b_id 是数字
+        const myId = String(useUserStore().id);
         this.snakes = [
-            new Snake({ id: 0, color: "#EC4899", r: gameObject.a_sx, c: gameObject.a_sy }, this),
-            new Snake({ id: 1, color: "#06B6D4", r: gameObject.b_sx, c: gameObject.b_sy }, this),
+            new Snake({ id: 0, color: "#EC4899", r: gameObject.a_sx, c: gameObject.a_sy,
+                username: gameObject.a_username, is_me: String(gameObject.a_id) === myId }, this),
+            new Snake({ id: 1, color: "#06B6D4", r: gameObject.b_sx, c: gameObject.b_sy,
+                username: gameObject.b_username, is_me: String(gameObject.b_id) === myId }, this),
         ]
 
         this.record_interval_id = null;
