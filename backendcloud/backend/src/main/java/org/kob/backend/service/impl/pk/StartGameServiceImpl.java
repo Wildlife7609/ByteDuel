@@ -82,9 +82,11 @@ public class StartGameServiceImpl implements StartGameService {
         game.start();
         ObjectNode respGame = objectMapper.createObjectNode();
         respGame.put("a_id", a.getUser().getId());
+        respGame.put("a_username", a.getUser().getUsername()); // 前端在蛇头上显示用户名
         respGame.put("a_sx", a.getSx());
         respGame.put("a_sy", a.getSy());
         respGame.put("b_id", b.getUser().getId());
+        respGame.put("b_username", b.getUser().getUsername());
         respGame.put("b_sx", b.getSx());
         respGame.put("b_sy", b.getSy());
         respGame.putPOJO("map", game.getG());

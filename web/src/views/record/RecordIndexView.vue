@@ -54,6 +54,8 @@ const open_record = (item) => {
         map: stringTo2D(item.record.map),
         a_id: item.record.aId,
         b_id: item.record.bId,
+        a_username: item.a_username,
+        b_username: item.b_username,
         a_sx: item.record.aSx,
         a_sy: item.record.aSy,
         b_sx: item.record.bSx,
