@@ -13,7 +13,10 @@ export class Snake extends AcGameObject {
         this.cells = [new Cell(info.r, info.c)]; // 蛇的身体
         this.next_cell = null; // 下一步要添加的位置
         this.speed = 5; // 蛇移动速度, 每秒移动5个格子
-        this.direction = -1; // -1:未按键, 0:上, 1:右, 2:下, 3:左
+        // 收到但还没走的方向，0:上, 1:右, 2:下, 3:左。上一步动画没走完时新方向会先排队，
+        // 不能只存一个方向：切到后台标签页时动画会暂停，后面的方向会把前面的覆盖掉，画面就和后端对不上了
+        this.directions = [];
+        this.result = null; // 对局结果，等排队的方向都走完再生效：{ dead, eye_direction }
         this.status = "idle"; // "idle" : 静止, "move" : 移动, "die" : 死亡
 
         this.dr = [-1, 0, 1, 0]; // row 变化量，对应 0, 1, 2, 3
@@ -45,7 +48,23 @@ export class Snake extends AcGameObject {
     }
 
     set_direction(d) {
-        this.direction = d;
+        this.directions.push(d);
+    }
+
+    has_next_step() {
+        return this.directions.length > 0;
+    }
+
+    // 对局结束：dead 表示这条蛇输了，eye_direction 是最后一步想走的方向（可以为空）
+    finish(dead, eye_direction) {
+        this.result = { dead, eye_direction };
+    }
+
+    apply_result() { // 排队的方向都走完了，再显示结果
+        if (!this.result || this.status !== "idle" || this.has_next_step()) return;
+        if (this.result.eye_direction != null) this.eye_direction = this.result.eye_direction;
+        if (this.result.dead) this.status = "die";
+        this.result = null;
     }
 
     check_tail_increasing() { // 检查蛇尾是否增长
@@ -55,10 +74,9 @@ export class Snake extends AcGameObject {
     }
 
     next_step() { // 计算下一个蛇头的位置
-        const d = this.direction;
+        const d = this.directions.shift();
         this.eye_direction = d; // 蛇头走一步之后，眼睛朝向变成当前方向
         this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
-        this.direction = -1; // 蛇头走一步之后，不再响应按键，直到下一步计算
         this.status = "move";
         this.step++;
 
@@ -77,7 +95,9 @@ export class Snake extends AcGameObject {
         const dx = this.next_cell.x - this.cells[0].x;
         const dy = this.next_cell.y - this.cells[0].y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < this.eps) { // 走到目标位置了
+        const move_distance = this.speed * this.timedelta / 1000;
+        // 这一帧就能走到也算到了：页面卡顿或切回后台标签页时 timedelta 很大，按比例走会冲过头，在目标附近来回抖
+        if (distance < this.eps || move_distance >= distance) { // 走到目标位置了
             this.status = "idle";
             this.cells[0] = this.next_cell; // 添加新的蛇头
             this.next_cell = null;
@@ -86,7 +106,6 @@ export class Snake extends AcGameObject {
                 this.cells.pop();
             }
         } else { // 没走到，继续走
-            const move_distance = this.speed * this.timedelta / 1000;
             this.cells[0].x += dx * move_distance / distance;
             this.cells[0].y += dy * move_distance / distance;
 
@@ -105,6 +124,7 @@ export class Snake extends AcGameObject {
         if (this.status === "move") {
             this.update_move();
         }
+        this.apply_result();
         this.render();
     }
 

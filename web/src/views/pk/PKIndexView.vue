@@ -46,16 +46,9 @@ onMounted(() => {
             console.log("比赛结果", data);
             const gameMap = pkStore.gameMap;
             const [snake0, snake1] = gameMap.snakes;
-            if (data.a_step != null) snake0.eye_direction = data.a_step;
-            if (data.b_step != null) snake1.eye_direction = data.b_step;
-            if (data.loser == "all") {
-                snake0.status = "die";
-                snake1.status = "die";
-            } else if (data.loser === "A") {
-                snake0.status = "die";
-            } else if (data.loser === "B") {
-                snake1.status = "die";
-            }
+            // 等两条蛇把排队的方向走完再显示结果
+            snake0.finish(data.loser === "all" || data.loser === "A", data.a_step);
+            snake1.finish(data.loser === "all" || data.loser === "B", data.b_step);
             pkStore.updateLoser(data.loser);
         }
 

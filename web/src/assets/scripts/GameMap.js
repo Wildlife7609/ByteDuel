@@ -15,7 +15,9 @@ export class GameMap extends AcGameObject {
 
         this.rows = gameObject.map.length;
         this.cols = gameObject.map[0].length;
+        // 墙要在蛇之前创建：对象按创建顺序绘制，这样蛇头上的名字标签不会被墙挡住
         this.walls = [];
+        this.create_walls();
 
         // 当前登录用户的蛇，标签上加“（你）”；store 里的 id 是字符串，a_id / b_id 是数字
         const myId = String(useUserStore().id);
@@ -53,8 +55,8 @@ export class GameMap extends AcGameObject {
             let k = 0;
             this.record_interval_id = setInterval(() => {
                 if (k >= a_steps.length) {
-                    if (loser === "all" || loser === "A") snake0.status = "die";
-                    if (loser === "all" || loser === "B") snake1.status = "die";
+                    snake0.finish(loser === "all" || loser === "A");
+                    snake1.finish(loser === "all" || loser === "B");
                     clearInterval(this.record_interval_id);
                     recordStore.updateIsFinished(true);
                 } else {
@@ -88,7 +90,6 @@ export class GameMap extends AcGameObject {
     }
 
     start() {
-        this.create_walls();
         this.add_listening_event();
     }
 
@@ -130,10 +131,10 @@ export class GameMap extends AcGameObject {
         }
     }
 
-    check_ready() { // 检查是否已经准备好开始游戏（所有蛇都已静止且方向已确定）
+    check_ready() { // 检查是否可以走下一步（所有蛇都已静止且都有排队的方向）
         for (const snake of this.snakes) {
             if (snake.status !== "idle") return false;
-            if (snake.direction === -1) return false;
+            if (!snake.has_next_step()) return false;
         }
         return true;
     }

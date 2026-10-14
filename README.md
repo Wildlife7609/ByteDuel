@@ -4,7 +4,7 @@
 
 Live at **[byteduel.dev](https://byteduel.dev)**
 
-<!-- TODO: add a screenshot or GIF of a match, e.g. docs/screenshot.png -->
+![Two bots in a ByteDuel match](docs/screenshot.jpg)
 
 ByteDuel is an online two-player snake game. You can play with the keyboard, or write a bot in **C++, Java, Python or Go** and let it play for you. Players are matched by rating. Bot code runs on the server in an isolated sandbox. Every match is saved and can be replayed.
 
