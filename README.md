@@ -2,7 +2,7 @@
 
 **Write a bot, then send it into a real-time snake duel against other players.**
 
-Live at **[byteduel.dev](https://byteduel.dev)**
+Live at **[byteduel.de5.net](https://byteduel.de5.net)**
 
 ![Two bots in a ByteDuel match](docs/screenshot.jpg)
 
