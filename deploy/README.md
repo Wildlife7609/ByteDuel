@@ -55,9 +55,11 @@ Cloudflare 后台的 SSL/TLS 模式要设成 **Full (strict)**。
 
 ```bash
 cd ~
-git clone git@github.com:Wildlife7609/KingsOfBots.git
-cd KingsOfBots
+git clone git@github.com:Wildlife7609/ByteDuel.git
+cd ByteDuel
 ```
+
+部署之后**不要给这个目录改名**：Docker Compose 用目录名当项目名，数据卷的名字也带着它（比如 `byteduel_pgdata`）。目录改名后再启动，会新建一个空数据库，旧数据还留在旧数据卷里。下文的路径都按 `/home/ubuntu/ByteDuel` 写，目录名不同的话要相应改掉（比如备份的 cron）。
 
 如果仓库是私有的，服务器需要有权限拉取：在服务器上 `ssh-keygen -t ed25519` 生成密钥，把 `~/.ssh/id_ed25519.pub` 添加到 GitHub 仓库的 **Settings → Deploy keys**（只读即可）。
 
@@ -129,7 +131,7 @@ docker compose exec -T postgres pg_dump -U kob -d kob | gzip > ~/backups/kob-$(d
 每天凌晨 3 点自动备份，并只保留最近 14 天（`crontab -e` 添加一行，路径按实际情况改）：
 
 ```
-0 3 * * * cd /home/ubuntu/KingsOfBots && docker compose exec -T postgres pg_dump -U kob -d kob | gzip > /home/ubuntu/backups/kob-$(date +\%F).sql.gz && find /home/ubuntu/backups -name 'kob-*.sql.gz' -mtime +14 -delete
+0 3 * * * cd /home/ubuntu/ByteDuel && docker compose exec -T postgres pg_dump -U kob -d kob | gzip > /home/ubuntu/backups/kob-$(date +\%F).sql.gz && find /home/ubuntu/backups -name 'kob-*.sql.gz' -mtime +14 -delete
 ```
 
 备份文件要定期拷贝到服务器以外的地方（比如自己电脑上），服务器被回收时才能恢复：
