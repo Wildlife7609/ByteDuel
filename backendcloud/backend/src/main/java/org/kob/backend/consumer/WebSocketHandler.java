@@ -73,6 +73,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Player player = playerManager.getPlayer(userId);
         if (player == null)
             return;
+        Game game = player.getGame();
+        if (game != null && game.isPlaying()) // 上一局还没结束，不能开新的一局
+            return;
         Bot bot = null;
         if (botId != -1) {
             bot = botMapper.selectById(botId);

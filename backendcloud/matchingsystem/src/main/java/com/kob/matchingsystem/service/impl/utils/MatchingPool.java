@@ -48,8 +48,10 @@ public class MatchingPool extends Thread {
         }
     }
 
-    private void matchPlayers() { // 尝试匹配所有玩家
+    // 尝试匹配所有玩家，返回配好的对，由调用方在释放锁之后通知 backend
+    private List<Player[]> matchPlayers() {
         System.out.println("MatchingPool matchPlayers " + players.toString());
+        List<Player[]> matched = new ArrayList<>();
         boolean[] used = new boolean[players.size()];
         for (int i = 0; i < players.size(); i++) {
             if (used[i])
@@ -64,7 +66,7 @@ public class MatchingPool extends Thread {
                 if (ratingDiff <= waitingTime * 10) {
                     used[i] = true;
                     used[j] = true;
-                    sendResult(playerA, playerB);
+                    matched.add(new Player[]{playerA, playerB});
                     break;
                 }
             }
@@ -77,6 +79,7 @@ public class MatchingPool extends Thread {
         }
         players.clear();
         players.addAll(newPlayers);
+        return matched;
     }
 
     private void sendResult(Player a, Player b) { // 发送匹配结果
@@ -96,13 +99,17 @@ public class MatchingPool extends Thread {
         while (true) {
             try {
                 Thread.sleep(1000);
+                List<Player[]> matched;
                 lock.lock();
                 try {
                     increaseWaitingTime();
-                    matchPlayers();
+                    matched = matchPlayers();
                 } finally {
                     lock.unlock();
                 }
+                // 通知 backend 时不能拿着锁：backend 响应慢的话，加入、取消匹配的请求都会被卡住
+                for (Player[] pair : matched)
+                    sendResult(pair[0], pair[1]);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 break;

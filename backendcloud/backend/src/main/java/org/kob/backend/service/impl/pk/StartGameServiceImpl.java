@@ -66,8 +66,7 @@ public class StartGameServiceImpl implements StartGameService {
     }
 
     private void startGame(Player a, Player b) {
-        Game game = new Game(15, 14, 20, a, b, recordMapper, botRunningClient, userMapper);
-        game.createMap();
+        Game game = new Game(15, 14, 20, a, b, recordMapper, botRunningClient, userMapper); // 构造函数里已经生成了地图
 
         a.setGame(game);
         a.setSx(game.getRows() - 2);

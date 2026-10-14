@@ -28,7 +28,7 @@ public class Game extends Thread {
     private Integer nextStepP2 = null;
     private final ReentrantLock lock = new ReentrantLock();
 
-    private String status = "playing"; // "playing" : 游戏进行中, "finished" : 游戏结束
+    private volatile String status = "playing"; // "playing" : 游戏进行中, "finished" : 游戏结束。WebSocket 线程也会读
     private String loser = ""; // "all": 平局, "A" : A 输, "B" : B 输
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -64,6 +64,10 @@ public class Game extends Thread {
 
     public Player getP2() {
         return p2;
+    }
+
+    public boolean isPlaying() {
+        return status.equals("playing");
     }
 
     public void setNextStepP1(Integer nextStepP1) {
@@ -238,8 +242,11 @@ public class Game extends Thread {
     }
 
     private void sendMessageToAll(String message) { // 发送地图信息和玩家操作信息给所有玩家
-        p1.sendMessage(message);
-        p2.sendMessage(message);
+        // 玩家已经进入了新的一局，就不再给他发这一局的消息，免得前端把两局的结果混在一起
+        if (p1.getGame() == this)
+            p1.sendMessage(message);
+        if (p2.getGame() == this)
+            p2.sendMessage(message);
     }
 
     private boolean check_valid(List<Cell> cellsA, List<Cell> cellsB) {
@@ -341,21 +348,26 @@ public class Game extends Thread {
         return g;
     }
 
+    // BFS，每个格子最多访问一次。不能用回溯的 DFS（走完把格子标回 0）：那样会穷举所有路径，
+    // 地图连通性差时要跑几秒甚至更久，开局请求被卡住，玩家以为没匹配上又重新匹配，导致两局同时进行
     private boolean check_connectivity(int sx, int sy, int tx, int ty) {
-        if (sx == tx && sy == ty)
-            return true;
-        g[sx][sy] = 1;
-        for (int i = 0; i < 4; i++) {
-            int nx = sx + offset[i];
-            int ny = sy + offset[i + 1];
-            if (nx >= 0 && nx < this.rows && ny >= 0 && ny < this.cols && g[nx][ny] == 0) {
-                if (check_connectivity(nx, ny, tx, ty)) {
-                    g[sx][sy] = 0;
-                    return true;
+        boolean[][] visited = new boolean[rows][cols];
+        ArrayDeque<int[]> queue = new ArrayDeque<>();
+        visited[sx][sy] = true;
+        queue.add(new int[]{sx, sy});
+        while (!queue.isEmpty()) {
+            int[] cell = queue.poll();
+            if (cell[0] == tx && cell[1] == ty)
+                return true;
+            for (int i = 0; i < 4; i++) {
+                int nx = cell[0] + offset[i];
+                int ny = cell[1] + offset[i + 1];
+                if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && g[nx][ny] == 0 && !visited[nx][ny]) {
+                    visited[nx][ny] = true;
+                    queue.add(new int[]{nx, ny});
                 }
             }
         }
-        g[sx][sy] = 0;
         return false;
     }
 
