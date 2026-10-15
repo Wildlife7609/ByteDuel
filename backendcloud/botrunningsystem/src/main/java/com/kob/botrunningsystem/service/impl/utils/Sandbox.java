@@ -1,10 +1,12 @@
 package com.kob.botrunningsystem.service.impl.utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
@@ -31,6 +33,22 @@ public class Sandbox {
 
     // 编译缓存：key 是语言 + 代码，value 是编译产物在 go-judge 里的 fileId。同一份代码只编译一次
     private final ConcurrentHashMap<String, String> compiledBots = new ConcurrentHashMap<>();
+
+    // 启动时缓存是空的，go-judge 里上次运行留下的编译产物再也用不到了，不删的话每次重启都会多一批一直占着内存
+    // 只有本服务用 go-judge，所以里面的文件都可以删
+    @PostConstruct
+    public void clearSandboxFiles() {
+        try {
+            Map<String, String> files = sandboxClient.get().uri("/file")
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<Map<String, String>>() {});
+            if (files != null)
+                for (String fileId : files.keySet())
+                    sandboxClient.delete().uri("/file/{id}", fileId).retrieve().toBodilessEntity();
+        } catch (Exception e) {
+            e.printStackTrace(); // go-judge 还没启动好也不影响本服务启动
+        }
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     record Result(String status, String error, Map<String, String> files, Map<String, String> fileIds) {
@@ -126,7 +144,12 @@ public class Sandbox {
         // 每回合限时 5 秒，两个 Bot 加上网络往返都要在这之内完成
         Map<String, Object> cmd = command(language.getRunArgs(), input + "\n", 2000, 3000);
         cmd.put("copyIn", Map.of(language.getExecutable(), Map.of("fileId", fileId)));
-        return send(cmd);
+        try {
+            return send(cmd);
+        } catch (HttpClientErrorException.NotFound e) {
+            // 文件不在 go-judge 里了（go-judge 重启过），go-judge 返回 404，当作 File Error 让调用方重新编译
+            return new Result("File Error", e.getMessage(), null, null);
+        }
     }
 
     private Map<String, Object> command(List<String> args, String stdin, long cpuLimitMs, long clockLimitMs) {
