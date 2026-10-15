@@ -117,3 +117,18 @@ web/                 Vue 3 frontend + Caddyfile
 deploy/              deployment guide
 docker-compose.yml
 ```
+
+## Background
+
+ByteDuel started as the King of Bots project from AcWing's Spring Boot course. The course version compiles bots with joor inside the bot service's own JVM, so it supports only Java and has no isolation, and it stores data in MySQL.
+
+On top of that version, I added:
+
+- **Sandboxed bots in four languages.** C++, Java, Python and Go bots compile and run in go-judge with CPU, memory and process limits and no network access. The Go standard library is prebuilt into the sandbox image to cut compile time from about 6s to 0.9s.
+- **Compile checks and caching.** A bot that does not compile is rejected when it is saved. Compiled binaries are cached and both bots are compiled before a match starts, so every turn stays within the 5-second limit.
+- **Deployment.** Docker Compose on an ARM VM behind Cloudflare and Caddy, with end-to-end TLS. The database moved from MySQL to PostgreSQL.
+- **Security.** Services authenticate each other with a shared secret compared in constant time, Caddy blocks internal endpoints from the outside, and an account is locked for 10 minutes after 5 failed logins. The frontend shows the lockout message.
+- **Accounts and bots.** Each user can keep up to 10 bots, and new bots start from a template in the chosen language. An account plays from one window at a time: opening the game in a new window closes the old connection.
+- **Stack.** Upgraded to Java 25 and Spring Boot 4, and services call each other with `RestClient` instead of `RestTemplate`.
+- **UI.** A redesigned look: papercraft-style snakes on a grass board, with usernames shown above the snake heads and your own snake highlighted.
+- **Fixes.** A backtracking DFS in map generation could stall game start for 20 seconds; it is now a BFS. The frontend no longer drops moves and shows wrong results when a tab is in the background. go-judge crashed on arm64 because its seccomp profile was missing a syscall; I reported it upstream ([criyle/go-judge#202](https://github.com/criyle/go-judge/issues/202)), and it was fixed in v1.13.3.
