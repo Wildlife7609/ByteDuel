@@ -1,17 +1,17 @@
-# 整套服务的部署配置，步骤见 deploy/README.md
-# 所有可配置项都在同目录的 .env 里（模板：.env.example），只有 web 对外开放端口，其余都在内部网络
+# Deployment config for the whole stack; see deploy/README.md for the steps
+# All settings live in .env next to this file (template: .env.example). Only web publishes ports; everything else stays on the internal network
 services:
   postgres:
     image: postgres:18
     restart: unless-stopped
     environment:
       POSTGRES_USER: kob
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?请在 .env 里设置 DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       POSTGRES_DB: kob
     volumes:
-      # PostgreSQL 18 的镜像把数据目录挂在 /var/lib/postgresql（旧版本是 /var/lib/postgresql/data）
+      # The PostgreSQL 18 image keeps its data under /var/lib/postgresql (older versions used /var/lib/postgresql/data)
       - pgdata:/var/lib/postgresql
-      # 数据卷为空时（第一次启动）自动执行建表脚本
+      # Runs the schema script when the volume is empty (first start)
       - ./backendcloud/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U kob -d kob"]
@@ -22,7 +22,7 @@ services:
   sandbox:
     build: ./backendcloud/sandbox
     restart: unless-stopped
-    # go-judge 要在容器里再创建隔离环境和子 cgroup，必须有这两项
+    # go-judge creates isolated environments and child cgroups inside the container, so both are required
     privileged: true
     cgroup: host
     shm_size: 256m
@@ -35,7 +35,7 @@ services:
     environment:
       BACKEND_URL: http://backend:8080
       SANDBOX_URL: http://sandbox:5050
-      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?请在 .env 里设置 INTERNAL_TOKEN}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?INTERNAL_TOKEN must be set in .env}
       JAVA_TOOL_OPTIONS: -Xmx256m
     depends_on:
       - sandbox
@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
     environment:
       BACKEND_URL: http://backend:8080
-      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?请在 .env 里设置 INTERNAL_TOKEN}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?INTERNAL_TOKEN must be set in .env}
       JAVA_TOOL_OPTIONS: -Xmx128m
 
   backend:
@@ -58,11 +58,11 @@ services:
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/kob
       DB_USERNAME: kob
-      DB_PASSWORD: ${DB_PASSWORD:?请在 .env 里设置 DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET:?请在 .env 里设置 JWT_SECRET}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
       MATCHING_URL: http://matchingsystem:8081
       BOT_RUNNING_URL: http://botrunningsystem:8082
-      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?请在 .env 里设置 INTERNAL_TOKEN}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:?INTERNAL_TOKEN must be set in .env}
       JAVA_TOOL_OPTIONS: -Xmx384m
     depends_on:
       postgres:

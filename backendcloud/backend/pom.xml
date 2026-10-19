@@ -12,7 +12,7 @@
     <groupId>com.kob.backend</groupId>
     <artifactId>backend</artifactId>
 
-    <!-- webmvc、security、lombok 继承自父 pom，这里只放 backend 独有的依赖 -->
+    <!-- webmvc, security and lombok come from the parent pom; only backend-specific dependencies go here -->
     <dependencies>
 
         <dependency>
@@ -21,7 +21,7 @@
             <version>3.5.17</version>
         </dependency>
 
-        <!-- PostgreSQL 驱动，版本由 Spring Boot 管理 -->
+        <!-- PostgreSQL driver; Spring Boot manages the version -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>

@@ -1,14 +1,14 @@
-# 三个 Spring Boot 服务共用一个 Dockerfile：先一起打包，再分别生成三个运行镜像
-# docker-compose.yml 里用 target 指定要哪一个：backend / matchingsystem / botrunningsystem
+# One Dockerfile for all three Spring Boot services: build them together, then produce a runtime image for each
+# docker-compose.yml picks one with target: backend / matchingsystem / botrunningsystem
 
-# 构建阶段固定用构建机器自己的架构，不走模拟器（打出来的 jar 不分 CPU 架构）
+# The build stage always uses the build machine's own architecture, without emulation (the jars are architecture-independent)
 FROM --platform=$BUILDPLATFORM maven:3-eclipse-temurin-25 AS build
 WORKDIR /src
 COPY . .
-# Maven 依赖缓存在 BuildKit 里，重新构建时不用再下载
+# Maven dependencies are cached by BuildKit, so rebuilds do not download them again
 RUN --mount=type=cache,target=/root/.m2 mvn -q -B package -DskipTests
 
-# 运行阶段只需要 JRE；内存上限由 docker-compose.yml 里的 JAVA_TOOL_OPTIONS 设置
+# The runtime stage only needs a JRE; the memory limit is set by JAVA_TOOL_OPTIONS in docker-compose.yml
 FROM eclipse-temurin:25-jre AS runtime
 WORKDIR /app
 ENTRYPOINT ["java", "-jar", "app.jar"]

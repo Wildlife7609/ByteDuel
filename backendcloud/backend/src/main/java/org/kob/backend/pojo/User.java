@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("users") // 表名统一用复数；user 本身也是 PostgreSQL 的保留字
+@TableName("users") // table names are plural; user is also a reserved word in PostgreSQL
 public class User {
     @TableId(type = IdType.AUTO)
     private Integer id;

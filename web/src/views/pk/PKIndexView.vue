@@ -10,7 +10,7 @@ import ResultBoard from '@/components/ResultBoard.vue';
 const pkStore = usePkStore();
 const userStore = useUserStore();
 const recordStore = useRecordStore();
-// 和页面同域名；HTTPS 页面必须用 wss
+// Same origin as the page; an HTTPS page must use wss
 const socketUrl = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/websocket/${userStore.token}`;
 let socket = null;
 
@@ -18,13 +18,13 @@ onMounted(() => {
     recordStore.updateIsRecord(false);
     socket = new WebSocket(socketUrl);
     socket.onopen = () => {
-        console.log("连接成功");
+        console.log("Connected");
     }
     pkStore.updateSocket(socket);
     socket.onmessage = (msg) => {
         const data = JSON.parse(msg.data);
         if (data.event === "match-success") {
-            console.log("匹配成功");
+            console.log("Match found");
             pkStore.updateOpponent(data.opponent_username, data.opponent_photo);
             setTimeout(() => {
                 pkStore.updateStatus("playing");
@@ -32,10 +32,10 @@ onMounted(() => {
             pkStore.updateGameObject(data.game);
         }
         else if (data.event === "move") {
-            console.log("收到移动命令", data);
+            console.log("Received move", data);
             const gameMap = pkStore.gameMap;
             if (!gameMap || !gameMap.snakes) {
-                console.log("⚠️ gameMap 还没准备好，方向被丢弃了", gameMap); // 加这行
+                console.log("⚠️ gameMap is not ready, move dropped", gameMap);
                 return;
             }
             const [snake0, snake1] = gameMap.snakes;
@@ -43,10 +43,10 @@ onMounted(() => {
             snake1.set_direction(data.b_step);
         }
         else if (data.event === "result") {
-            console.log("比赛结果", data);
+            console.log("Game result", data);
             const gameMap = pkStore.gameMap;
             const [snake0, snake1] = gameMap.snakes;
-            // 等两条蛇把排队的方向走完再显示结果
+            // show the result after both snakes finish their queued moves
             snake0.finish(data.loser === "all" || data.loser === "A", data.a_step);
             snake1.finish(data.loser === "all" || data.loser === "B", data.b_step);
             pkStore.updateLoser(data.loser);
@@ -54,9 +54,9 @@ onMounted(() => {
 
     }
     socket.onclose = (e) => {
-        console.log("连接关闭");
-        if (e.code === 4000) { // 后端踢下线：同一账号在别的窗口连上了
-            alert("你的账号已在其他窗口进入对战页面，当前窗口已断开");
+        console.log("Connection closed");
+        if (e.code === 4000) { // kicked by the backend: the same account connected from another window
+            alert("Your account opened the Play page in another window, so this window has been disconnected.");
         }
     }
 })

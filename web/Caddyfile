@@ -1,26 +1,26 @@
-# 两个环境变量由 docker-compose.yml 传入（在 .env 里设置）：
-#   线上：SITE_ADDRESS=域名，TLS=tls /certs/origin.pem /certs/origin.key（Cloudflare Origin 证书）
-#   本地测试：SITE_ADDRESS=:80，TLS 留空，只用 HTTP
+# Two environment variables are passed in by docker-compose.yml (set them in .env):
+#   Production: SITE_ADDRESS=<domain>, TLS=tls /certs/origin.pem /certs/origin.key (Cloudflare Origin certificate)
+#   Local testing: SITE_ADDRESS=:80, TLS empty, HTTP only
 {$SITE_ADDRESS::80} {
 	{$TLS}
 
 	encode gzip
 
-	# /pk/ 下都是内部接口（开始对局、接收 Bot 的移动），只给服务之间调用，不允许从外部访问
+	# Everything under /pk/ is internal (starting games, receiving bot moves): only the services call it, so block outside access
 	@internal path /api/pk /api/pk/*
 	respond @internal 403
 
-	# API 转发给 backend，去掉 /api 前缀
+	# Forward the API to backend, stripping the /api prefix
 	handle_path /api/* {
 		reverse_proxy backend:8080
 	}
 
-	# 对局用的 WebSocket，Caddy 会自动处理连接升级
+	# WebSocket for games; Caddy handles the upgrade automatically
 	handle /websocket/* {
 		reverse_proxy backend:8080
 	}
 
-	# 其他请求都是前端页面；Vue 路由的路径（如 /ranklist/）没有对应文件，返回 index.html
+	# Everything else is the frontend; Vue router paths (such as /ranklist/) have no file, so serve index.html
 	handle {
 		root * /srv
 		try_files {path} /index.html

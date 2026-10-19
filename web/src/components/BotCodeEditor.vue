@@ -16,7 +16,7 @@ ace.config.set(
     "basePath",
     "https://cdn.jsdelivr.net/npm/ace-builds@" + ace.version + "/src-noconflict/"
 );
-// 支持 v-model 绑定代码，v-model:language 绑定语言
+// v-model binds the code, v-model:language binds the language
 const content = defineModel({ default: '' });
 const language = defineModel('language', { default: DEFAULT_LANGUAGE });
 const wrapSwitchId = useId();
@@ -47,15 +47,15 @@ const editorOptions = computed(() => ({
 const resetCode = () => {
     const template = BOT_TEMPLATES[language.value];
     if (content.value === template) return;
-    if (confirm("确定要将编辑器中的代码恢复为默认模板吗？当前代码将会丢失。")) {
+    if (confirm("Reset the editor to the default template? Your current code will be lost.")) {
         content.value = template;
     }
 };
-// 切换语言时换成新语言的模板；代码改过的话先确认，取消就把下拉框改回去
+// Switching language loads that language's template; if the code was edited, confirm first, and revert the dropdown on cancel
 const changeLanguage = (event) => {
     const newLanguage = event.target.value;
     const untouched = !content.value.trim() || Object.values(BOT_TEMPLATES).includes(content.value);
-    if (!untouched && !confirm("切换语言会把代码替换为新语言的模板，当前代码将会丢失，确定吗？")) {
+    if (!untouched && !confirm("Switching language replaces your code with the template for the new language. Your current code will be lost. Continue?")) {
         event.target.value = language.value;
         return;
     }
@@ -67,18 +67,18 @@ const changeLanguage = (event) => {
     <div class="mb-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center gap-2">
-                <label class="form-label mb-0 fw-semibold">Bot 代码</label>
+                <label class="form-label mb-0 fw-semibold">Bot code</label>
                 <span class="small" :class="(content?.length || 0) > 10000 ? 'text-danger fw-bold' : 'text-muted'">
                     {{ content?.length || 0 }} / 10000
                 </span>
             </div>
             <div class="d-flex gap-2 align-items-center">
-                <!-- 语言切换 -->
+                <!-- Language picker -->
                 <select :value="language" @change="changeLanguage" class="form-select form-select-sm"
                     style="width: 105px;">
                     <option v-for="lang in LANGUAGES" :key="lang.value" :value="lang.value">{{ lang.label }}</option>
                 </select>
-                <!-- 设置悬浮面板 -->
+                <!-- Settings dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
                         data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
@@ -90,39 +90,39 @@ const changeLanguage = (event) => {
                     </button>
                     <div class="dropdown-menu dropdown-menu-end p-3 shadow" style="width: 250px; z-index: 1060;">
                         <div class="mb-2">
-                            <label class="form-label small text-muted mb-1">主题风格</label>
+                            <label class="form-label small text-muted mb-1">Theme</label>
                             <select v-model="editorSettings.theme" @change="saveSettings"
                                 class="form-select form-select-sm">
-                                <option value="textmate">浅色 (Textmate)</option>
-                                <option value="chrome">浅色 (Chrome)</option>
-                                <option value="monokai">深色 (Monokai)</option>
-                                <option value="dracula">深色 (Dracula)</option>
+                                <option value="textmate">Light (Textmate)</option>
+                                <option value="chrome">Light (Chrome)</option>
+                                <option value="monokai">Dark (Monokai)</option>
+                                <option value="dracula">Dark (Dracula)</option>
                             </select>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label small text-muted mb-1">字体大小</label>
+                            <label class="form-label small text-muted mb-1">Font size</label>
                             <select v-model="editorSettings.fontSize" @change="saveSettings"
                                 class="form-select form-select-sm">
-                                <option :value="14">14 px (较小)</option>
-                                <option :value="16">16 px (推荐)</option>
-                                <option :value="18">18 px (较大)</option>
-                                <option :value="20">20 px (超大)</option>
+                                <option :value="14">14 px (small)</option>
+                                <option :value="16">16 px (default)</option>
+                                <option :value="18">18 px (large)</option>
+                                <option :value="20">20 px (extra large)</option>
                             </select>
                         </div>
                         <div class="form-check form-switch mb-1">
                             <input class="form-check-input" type="checkbox" :id=wrapSwitchId
                                 v-model="editorSettings.wrap" @change="saveSettings">
-                            <label class="form-check-label small" :for=wrapSwitchId>长代码自动换行</label>
+                            <label class="form-check-label small" :for=wrapSwitchId>Wrap long lines</label>
                         </div>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" :id=completeSwitchId
                                 v-model="editorSettings.enableAutocompletion" @change="saveSettings">
-                            <label class="form-check-label small" :for=completeSwitchId>实时自动补全</label>
+                            <label class="form-check-label small" :for=completeSwitchId>Live autocompletion</label>
                         </div>
                     </div>
                 </div>
-                <!-- 恢复模板按钮 -->
-                <button type="button" class="btn btn-sm btn-outline-secondary" title="恢复模板" @click="resetCode">
+                <!-- Reset to template -->
+                <button type="button" class="btn btn-sm btn-outline-secondary" title="Reset to template" @click="resetCode">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                         class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z" />

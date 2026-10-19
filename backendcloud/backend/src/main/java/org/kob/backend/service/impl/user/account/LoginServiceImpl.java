@@ -21,7 +21,7 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public Map<String, String> getToken(String username, String password) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-        Authentication authenticate = authenticationManager.authenticate(authenticationToken); //如果登录失败会自动处理
+        Authentication authenticate = authenticationManager.authenticate(authenticationToken); // throws if authentication fails
         UserDetailsImpl loginUser = (UserDetailsImpl) authenticate.getPrincipal();
         User user = loginUser.getUser();
 

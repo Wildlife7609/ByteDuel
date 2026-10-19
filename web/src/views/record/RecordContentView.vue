@@ -9,20 +9,20 @@ const recordStore = useRecordStore()
 const pkStore = usePkStore()
 const router = useRouter()
 
-if (!pkStore.gameObject) { // 刷新页面后 store 被清空，回到列表页
+if (!pkStore.gameObject) { // the store is empty after a page refresh, so go back to the list
     router.replace({ name: 'record' });
 }
 
 const replayKey = ref(0);
 const replay = () => {
     recordStore.updateIsFinished(false);
-    replayKey.value++; // key 变化会销毁并重建 PlayGround，从第 0 步重新播放
+    replayKey.value++; // changing the key recreates PlayGround, replaying from step 0
 };
 
 const resultText = computed(() => {
-    if (recordStore.loser === "all") return "平局";
-    if (recordStore.loser === "A") return "玩家 B 获胜";
-    return "玩家 A 获胜";
+    if (recordStore.loser === "all") return "Draw";
+    if (recordStore.loser === "A") return "Player B wins";
+    return "Player A wins";
 });
 </script>
 
@@ -30,8 +30,8 @@ const resultText = computed(() => {
     <PlayGround v-if="pkStore.gameObject" :key="replayKey" />
     <div v-if="recordStore.is_finished" class="record-result">
         <div class="record-result-text">{{ resultText }}</div>
-        <button type="button" class="btn btn-warning record-result-button" @click="replay">重新播放</button>
-        <button type="button" class="btn btn-outline-light record-result-button" @click="router.push({ name: 'record' })">返回列表</button>
+        <button type="button" class="btn btn-warning record-result-button" @click="replay">Replay</button>
+        <button type="button" class="btn btn-outline-light record-result-button" @click="router.push({ name: 'record' })">Back to list</button>
     </div>
 </template>
 
@@ -40,10 +40,13 @@ const resultText = computed(() => {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
     width: fit-content;
+    max-width: calc(100vw - 32px);
     margin: -2rem auto 0;
     padding: 1rem 2rem;
-    /* 与 MatchGround / ResultBoard 保持一致的深色毛玻璃风格 */
+    /* same dark frosted-glass style as MatchGround / ResultBoard */
     background: rgba(30, 41, 59, 0.7);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.15);

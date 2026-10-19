@@ -29,7 +29,7 @@ public class StartGameServiceImpl implements StartGameService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    @Qualifier("botRunningClient") // 有两个 RestClient，按名字指定用哪一个
+    @Qualifier("botRunningClient") // there are two RestClients, so pick one by name
     private RestClient botRunningClient;
     @Autowired
     @Qualifier("matchingClient")
@@ -48,7 +48,7 @@ public class StartGameServiceImpl implements StartGameService {
             if (b != null) {
                 addPlayerBackToMatchingPool(b);
             }
-            return "player offline"; // 配对期间有人掉线
+            return "player offline"; // someone disconnected while being matched
         }
         startGame(a, b);
         return "start game success";
@@ -66,7 +66,7 @@ public class StartGameServiceImpl implements StartGameService {
     }
 
     private void startGame(Player a, Player b) {
-        Game game = new Game(15, 14, 20, a, b, recordMapper, botRunningClient, userMapper); // 构造函数里已经生成了地图
+        Game game = new Game(15, 14, 20, a, b, recordMapper, botRunningClient, userMapper); // the constructor generates the map
 
         a.setGame(game);
         a.setSx(game.getRows() - 2);
@@ -81,7 +81,7 @@ public class StartGameServiceImpl implements StartGameService {
         game.start();
         ObjectNode respGame = objectMapper.createObjectNode();
         respGame.put("a_id", a.getUser().getId());
-        respGame.put("a_username", a.getUser().getUsername()); // 前端在蛇头上显示用户名
+        respGame.put("a_username", a.getUser().getUsername()); // the frontend shows usernames above the snakes
         respGame.put("a_sx", a.getSx());
         respGame.put("a_sy", a.getSy());
         respGame.put("b_id", b.getUser().getId());

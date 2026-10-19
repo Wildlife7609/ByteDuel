@@ -45,6 +45,14 @@ export const usePkStore = defineStore('pk', () => {
         loser.value = newLoser;
     }
 
+    // direction: 0 up, 1 right, 2 down, 3 left. Used by both the keyboard and the on-screen buttons
+    const sendMove = (direction) => {
+        socket.value?.send(JSON.stringify({
+            event: "move",
+            direction,
+        }));
+    }
+
     return {
         socket,
         status,
@@ -56,6 +64,7 @@ export const usePkStore = defineStore('pk', () => {
         gameMap,
         loser,
         updateLoser,
+        sendMove,
         updateSocket,
         updateOpponent,
         updateStatus,

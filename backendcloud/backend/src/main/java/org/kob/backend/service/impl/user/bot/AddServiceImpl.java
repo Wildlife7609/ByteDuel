@@ -35,40 +35,40 @@ public class AddServiceImpl implements AddService {
         Map<String, String> map = new HashMap<>();
 
         if (title == null || title.isBlank()) {
-            map.put("error_message", "标题不能为空");
+            map.put("error_message", "Bot name cannot be empty");
             return map;
         }
         if (title.length() > 100) {
-            map.put("error_message", "标题长度不能大于100");
+            map.put("error_message", "Bot name cannot exceed 100 characters");
             return map;
         }
         if (description == null || description.isBlank()) {
-            description = "这个用户很懒，什么也没留下~";
+            description = "No description provided.";
         }
         if (description.length() > 300) {
-            map.put("error_message", "描述长度不能大于300");
+            map.put("error_message", "Bot description cannot exceed 300 characters");
             return map;
         }
         if (content == null || content.isBlank()) {
-            map.put("error_message", "内容不能为空");
+            map.put("error_message", "Bot code cannot be empty");
             return map;
         }
         if (content.length() > 10000) {
-            map.put("error_message", "内容长度不能大于10000");
+            map.put("error_message", "Bot code cannot exceed 10,000 characters");
             return map;
         }
         if (language == null || !BotCodeChecker.LANGUAGES.contains(language)) {
-            map.put("error_message", "不支持的语言");
+            map.put("error_message", "Unsupported language");
             return map;
         }
 
         QueryWrapper<Bot> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", user.getId());
         if (botMapper.selectCount(queryWrapper) >= 10) {
-            map.put("error_message", "每个用户最多只能创建10个Bot！");
+            map.put("error_message", "You can create at most 10 bots.");
             return map;
         }
-        // 编译比较耗时，放在其他检查都通过之后
+        // compiling is slow, so do it after every other check passes
         String compileError = botCodeChecker.check(language, content);
         if (compileError != null) {
             map.put("error_message", compileError);

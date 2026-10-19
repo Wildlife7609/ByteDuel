@@ -15,10 +15,10 @@ axios.interceptors.request.use(config => {
     throw error;
 });
 
-// 和页面同域名，由 Caddy（线上）或 Vite（本地开发）把 /api 转发给 backend
+// Same origin as the page; Caddy (production) or Vite (local dev) forwards /api to backend
 axios.defaults.baseURL = "/api";
 
-// 消除 Bootstrap Modal 关闭时 Chrome 报 Blocked aria-hidden 警告
+// Silence Chrome's "Blocked aria-hidden" warning when a Bootstrap modal closes
 document.addEventListener('hide.bs.modal', () => {
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();

@@ -9,17 +9,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-// 保存 Bot 前让 botrunningsystem 预编译一次：编译不过的代码不入库，同时预热编译缓存
+// Have botrunningsystem compile the bot before saving: code that does not compile is rejected, and the compile cache is warmed up
 @Component
 public class BotCodeChecker {
-    // 和 botrunningsystem 的 Language 枚举保持一致
+    // keep in sync with the Language enum in botrunningsystem
     public static final Set<String> LANGUAGES = Set.of("cpp", "java", "python", "go");
 
     @Autowired
-    @Qualifier("botRunningClient") // 有两个 RestClient，按名字指定用哪一个
+    @Qualifier("botRunningClient") // there are two RestClients, so pick one by name
     private RestClient botRunningClient;
 
-    // 通过返回 null，否则返回给用户看的错误信息
+    // returns null on success, otherwise an error message for the user
     public String check(String language, String content) {
         Map<String, String> data = new HashMap<>();
         data.put("bot_language", language);
@@ -28,10 +28,10 @@ public class BotCodeChecker {
             String resp = botRunningClient.post().uri("/bot/compile/").body(data).retrieve().body(String.class);
             if ("success".equals(resp))
                 return null;
-            return resp == null ? "Bot 编译检查失败" : resp;
+            return resp == null ? "Bot compile check failed" : resp;
         } catch (Exception e) {
             e.printStackTrace();
-            return "Bot 编译服务暂不可用，请稍后重试";
+            return "The bot compiler is unavailable. Please try again later.";
         }
     }
 }

@@ -15,10 +15,10 @@ const totalRecords = ref(0)
 const currentPage = ref(1)
 const PAGE_SIZE = 10
 const totalPages = computed(() => Math.ceil(totalRecords.value / PAGE_SIZE))
-const loaded = ref(false) // 首次请求返回前不显示空状态，避免闪一下"暂无对局记录"
+const loaded = ref(false) // Hide the empty state until the first response arrives, so "No matches yet" does not flash briefly
 
-// 多页时最后一页不满，用一行"没有更多记录了"占满剩余高度，保持表格高度不变，分页条不会跳动
-const ROW_HEIGHT = 57 // 真实行高：头像 40px + 上下内边距 16px + 边框 1px
+// With several pages, fill the short last page with a "No more records" row so the table keeps its height and the pagination bar does not jump
+const ROW_HEIGHT = 57 // actual row height: 40px avatar + 16px vertical padding + 1px border
 const emptyRows = computed(() => totalPages.value > 1 ? PAGE_SIZE - records.value.length : 0)
 
 const pages = computed(() => {
@@ -67,7 +67,7 @@ const open_record = (item) => {
 }
 
 
-// 1. 获取对局列表
+// 1. Load the match list
 const pull_page = async (page) => {
     currentPage.value = page;
     try {
@@ -78,15 +78,15 @@ const pull_page = async (page) => {
         totalRecords.value = res.data.total;
         loaded.value = true;
     } catch (error) {
-        console.log("获取对局列表失败：", error);
+        console.log("Failed to load matches:", error);
     }
 }
 
 const resultText= (item, player) => {
     const loser = item.record.loser;
-    if (loser === "all") return "平局";
-    if (loser === player) return "失败";
-    return "胜利";
+    if (loser === "all") return "Draw";
+    if (loser === player) return "Loss";
+    return "Win";
 }
 
 const resultClass = (item, player) => {
@@ -103,20 +103,21 @@ pull_page(currentPage.value);
 
 <template>
     <ContentField>
-        <!-- 空状态提示 -->
+        <!-- Empty state -->
         <div v-if="loaded && totalRecords === 0" class="text-center py-5 text-muted">
-            <p class="mb-2 fs-5">暂无对局记录</p>
-            <p class="mb-0">平台上还没有任何对局，快去匹配一局吧！</p>
+            <p class="mb-2 fs-5">No matches yet</p>
+            <p class="mb-0">No one has played yet. Go find a match!</p>
         </div>
 
-        <!-- Record 列表表格 -->
-        <table v-else-if="totalRecords > 0" class="table table-striped table-hover align-middle text-center">
+        <!-- Record table -->
+        <div v-else-if="totalRecords > 0" class="table-responsive">
+        <table class="table table-striped table-hover align-middle text-center">
             <thead>
                 <tr>
-                    <th scope="col" style="width: 25%;">玩家 A</th>
-                    <th scope="col" style="width: 25%;">玩家 B</th>
-                    <th scope="col" style="width: 25%;">对战时间</th>
-                    <th scope="col" style="width: 25%;">操作</th>
+                    <th scope="col" style="width: 25%;">Player A</th>
+                    <th scope="col" style="width: 25%;">Player B</th>
+                    <th scope="col" class="d-none d-md-table-cell" style="width: 25%;">Played at</th>
+                    <th scope="col" style="width: 25%;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -136,20 +137,23 @@ pull_page(currentPage.value);
                             {{ resultText(item, 'B') }}
                         </span>
                     </td>
-                    <td>{{ item.record.createTime }}</td>
+                    <td class="d-none d-md-table-cell">{{ item.record.createTime }}</td>
                     <td>
-                        <button type="button" class="btn btn-secondary btn-sm me-2"
-                            @click="open_record(item)">查看录像</button>
+                        <button type="button" class="btn btn-secondary btn-sm"
+                            @click="open_record(item)">Watch replay</button>
+                        <!-- on phones the time moves here instead of its own column -->
+                        <div class="d-md-none text-muted small mt-1">{{ item.record.createTime }}</div>
                     </td>
                 </tr>
                 <tr v-if="emptyRows > 0" class="no-more-row">
                     <td colspan="4" class="text-muted" :style="{ height: emptyRows * ROW_HEIGHT + 'px' }">
-                        没有更多记录了
+                        No more records
                     </td>
                 </tr>
             </tbody>
         </table>
-        <nav v-if="totalPages > 1" aria-label="对局列表分页">
+        </div>
+        <nav v-if="totalPages > 1" aria-label="Match list pages">
             <ul class="pagination" style="justify-content: center; margin-top: 30px;">
                 <li class="page-item" :class="{ disabled: currentPage === 1}">
                 <a class="page-link" href="#" aria-label="Previous" @click.prevent="go_page(currentPage - 1)">

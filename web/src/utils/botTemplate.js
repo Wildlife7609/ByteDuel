@@ -1,6 +1,6 @@
-// 每种语言创建 Bot 时默认填入的代码模板
-// 约定：程序每回合运行一次，从标准输入读一行局面，向标准输出打印方向 0~3
-// value 和后端存的语言名一致，mode 是 Ace 编辑器的语法高亮模式
+// Starter code filled in when a bot is created, one per language
+// Protocol: the program runs once per turn, reads one line of game state from stdin and prints a direction 0-3 to stdout
+// value matches the language name stored by the backend; mode is the Ace editor syntax mode
 export const LANGUAGES = [
     { value: "cpp", label: "C++", mode: "c_cpp" },
     { value: "java", label: "Java", mode: "java" },
@@ -10,7 +10,7 @@ export const LANGUAGES = [
 
 export const DEFAULT_LANGUAGE = "java";
 
-// 用 String.raw，模板里的 \n 等转义原样保留
+// String.raw keeps escapes such as \n in the templates as written
 export const BOT_TEMPLATES = {
     cpp: String.raw`#include <deque>
 #include <iostream>
@@ -21,24 +21,24 @@ export const BOT_TEMPLATES = {
 using namespace std;
 
 /*
- * 每回合运行一次：从标准输入读一行局面，向标准输出打印移动方向：0 上，1 右，2 下，3 左
+ * Runs once per turn: reads the game state as one line from stdin and prints a direction to stdout: 0 up, 1 right, 2 down, 3 left
  *
- * 输入格式：地图#我的起点x#我的起点y#(我的操作序列)#对手起点x#对手起点y#(对手操作序列)
- *   - 地图：15 行 14 列，按行拼成的 0/1 字符串，1 表示墙
- *   - 操作序列：每一步的方向拼起来，例如 (0121)
+ * Input: map#my_sx#my_sy#(my_steps)#opp_sx#opp_sy#(opp_steps)
+ *   - map: the 15 x 14 board as a row-by-row string of 0s and 1s, where 1 is a wall
+ *   - steps: every move made so far, e.g. (0121)
  */
 const int ROWS = 15, COLS = 14;
 const int dx[4] = {-1, 0, 1, 0}, dy[4] = {0, 1, 0, -1};
 
-// 和后端规则一致：前 10 步每步都变长，之后每 3 步变长一次
+// Same rule as the server: a snake grows on each of its first 10 steps, then on every 3rd step
 bool checkTailIncreasing(int step) {
     if (step <= 10) return true;
     return step % 3 == 1;
 }
 
-// 根据起点和操作序列，算出蛇身占据的所有格子，最后一个是蛇头
+// Rebuild a snake's body from its start cell and steps; the last cell is the head
 deque<pair<int, int>> getCells(int sx, int sy, string steps) {
-    steps = steps.substr(1, steps.size() - 2); // 去掉两边的括号
+    steps = steps.substr(1, steps.size() - 2); // strip the parentheses
     deque<pair<int, int>> res;
     int x = sx, y = sy;
     res.push_back({x, y});
@@ -71,7 +71,7 @@ int nextMove(const string& input) {
     for (auto& c : me) g[c.first][c.second] = 1;
     for (auto& c : you) g[c.first][c.second] = 1;
 
-    // 示例策略：选第一个不会撞墙、不会撞蛇的方向，在这里写你自己的策略
+    // Example strategy: take the first direction that hits neither a wall nor a snake. Write your own strategy here.
     auto head = me.back();
     for (int d = 0; d < 4; d++) {
         int x = head.first + dx[d], y = head.second + dy[d];
@@ -93,27 +93,27 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * 每回合运行一次：从标准输入读一行局面，向标准输出打印移动方向：0 上，1 右，2 下，3 左
- * 类名必须是 Main
+ * Runs once per turn: reads the game state as one line from stdin and prints a direction to stdout: 0 up, 1 right, 2 down, 3 left
+ * The class must be named Main
  *
- * 输入格式：地图#我的起点x#我的起点y#(我的操作序列)#对手起点x#对手起点y#(对手操作序列)
- *   - 地图：15 行 14 列，按行拼成的 0/1 字符串，1 表示墙
- *   - 操作序列：每一步的方向拼起来，例如 (0121)
+ * Input: map#my_sx#my_sy#(my_steps)#opp_sx#opp_sy#(opp_steps)
+ *   - map: the 15 x 14 board as a row-by-row string of 0s and 1s, where 1 is a wall
+ *   - steps: every move made so far, e.g. (0121)
  */
 public class Main {
     static final int ROWS = 15, COLS = 14;
     static final int[] dx = {-1, 0, 1, 0};
     static final int[] dy = {0, 1, 0, -1};
 
-    // 和后端规则一致：前 10 步每步都变长，之后每 3 步变长一次
+    // Same rule as the server: a snake grows on each of its first 10 steps, then on every 3rd step
     static boolean checkTailIncreasing(int step) {
         if (step <= 10) return true;
         return step % 3 == 1;
     }
 
-    // 根据起点和操作序列，算出蛇身占据的所有格子，最后一个是蛇头
+    // Rebuild a snake's body from its start cell and steps; the last cell is the head
     static List<int[]> getCells(int sx, int sy, String steps) {
-        steps = steps.substring(1, steps.length() - 1); // 去掉两边的括号
+        steps = steps.substring(1, steps.length() - 1); // strip the parentheses
         List<int[]> res = new ArrayList<>();
         int x = sx, y = sy;
         res.add(new int[]{x, y});
@@ -139,7 +139,7 @@ public class Main {
         for (int[] c : me) g[c[0]][c[1]] = 1;
         for (int[] c : you) g[c[0]][c[1]] = 1;
 
-        // 示例策略：选第一个不会撞墙、不会撞蛇的方向，在这里写你自己的策略
+        // Example strategy: take the first direction that hits neither a wall nor a snake. Write your own strategy here.
         int[] head = me.get(me.size() - 1);
         for (int d = 0; d < 4; d++) {
             int x = head[0] + dx[d], y = head[1] + dy[d];
@@ -157,11 +157,11 @@ public class Main {
 
     python: String.raw`import sys
 
-# 每回合运行一次：从标准输入读一行局面，向标准输出打印移动方向：0 上，1 右，2 下，3 左
+# Runs once per turn: reads the game state as one line from stdin and prints a direction to stdout: 0 up, 1 right, 2 down, 3 left
 #
-# 输入格式：地图#我的起点x#我的起点y#(我的操作序列)#对手起点x#对手起点y#(对手操作序列)
-#   - 地图：15 行 14 列，按行拼成的 0/1 字符串，1 表示墙
-#   - 操作序列：每一步的方向拼起来，例如 (0121)
+# Input: map#my_sx#my_sy#(my_steps)#opp_sx#opp_sy#(opp_steps)
+#   - map: the 15 x 14 board as a row-by-row string of 0s and 1s, where 1 is a wall
+#   - steps: every move made so far, e.g. (0121)
 
 ROWS, COLS = 15, 14
 DX = [-1, 0, 1, 0]
@@ -169,13 +169,13 @@ DY = [0, 1, 0, -1]
 
 
 def check_tail_increasing(step):
-    # 和后端规则一致：前 10 步每步都变长，之后每 3 步变长一次
+    # Same rule as the server: a snake grows on each of its first 10 steps, then on every 3rd step
     return step <= 10 or step % 3 == 1
 
 
 def get_cells(sx, sy, steps):
-    # 根据起点和操作序列，算出蛇身占据的所有格子，最后一个是蛇头
-    steps = steps[1:-1]  # 去掉两边的括号
+    # Rebuild a snake's body from its start cell and steps; the last cell is the head
+    steps = steps[1:-1]  # strip the parentheses
     cells = [(sx, sy)]
     x, y = sx, sy
     for i, ch in enumerate(steps, start=1):
@@ -196,7 +196,7 @@ def next_move(line):
     for x, y in me + you:
         g[x][y] = True
 
-    # 示例策略：选第一个不会撞墙、不会撞蛇的方向，在这里写你自己的策略
+    # Example strategy: take the first direction that hits neither a wall nor a snake. Write your own strategy here.
     hx, hy = me[-1]
     for d in range(4):
         x, y = hx + DX[d], hy + DY[d]
@@ -218,25 +218,25 @@ import (
 	"strings"
 )
 
-// 每回合运行一次：从标准输入读一行局面，向标准输出打印移动方向：0 上，1 右，2 下，3 左
+// Runs once per turn: reads the game state as one line from stdin and prints a direction to stdout: 0 up, 1 right, 2 down, 3 left
 //
-// 输入格式：地图#我的起点x#我的起点y#(我的操作序列)#对手起点x#对手起点y#(对手操作序列)
-//   - 地图：15 行 14 列，按行拼成的 0/1 字符串，1 表示墙
-//   - 操作序列：每一步的方向拼起来，例如 (0121)
+// Input: map#my_sx#my_sy#(my_steps)#opp_sx#opp_sy#(opp_steps)
+//   - map: the 15 x 14 board as a row-by-row string of 0s and 1s, where 1 is a wall
+//   - steps: every move made so far, e.g. (0121)
 
 const ROWS, COLS = 15, 14
 
 var dx = [4]int{-1, 0, 1, 0}
 var dy = [4]int{0, 1, 0, -1}
 
-// 和后端规则一致：前 10 步每步都变长，之后每 3 步变长一次
+// Same rule as the server: a snake grows on each of its first 10 steps, then on every 3rd step
 func checkTailIncreasing(step int) bool {
 	return step <= 10 || step%3 == 1
 }
 
-// 根据起点和操作序列，算出蛇身占据的所有格子，最后一个是蛇头
+// Rebuild a snake's body from its start cell and steps; the last cell is the head
 func getCells(sx, sy int, steps string) [][2]int {
-	steps = steps[1 : len(steps)-1] // 去掉两边的括号
+	steps = steps[1 : len(steps)-1] // strip the parentheses
 	cells := [][2]int{{sx, sy}}
 	x, y := sx, sy
 	for i := 0; i < len(steps); i++ {
@@ -273,7 +273,7 @@ func nextMove(input string) int {
 		g[c[0]][c[1]] = true
 	}
 
-	// 示例策略：选第一个不会撞墙、不会撞蛇的方向，在这里写你自己的策略
+	// Example strategy: take the first direction that hits neither a wall nor a snake. Write your own strategy here.
 	head := me[len(me)-1]
 	for d := 0; d < 4; d++ {
 		x, y := head[0]+dx[d], head[1]+dy[d]

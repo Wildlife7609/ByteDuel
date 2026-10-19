@@ -21,12 +21,12 @@ const login = async () => {
         router.push({ name: "home" });
     } catch (error) {
         if (error.response && error.response.status === 403) {
-            error_message.value = "用户名或密码错误";
+            error_message.value = "Incorrect username or password";
         } else if (error.response && error.response.status === 429) {
-            // backend 锁定账号时返回带 error_message 的 JSON；被 Cloudflare 限流时返回的是 HTML，没有这个字段
-            error_message.value = error.response.data?.error_message || "请求过于频繁，请稍后再试";
+            // a locked account gets JSON with error_message from backend; Cloudflare rate limiting returns HTML without that field
+            error_message.value = error.response.data?.error_message || "Too many requests. Please try again later.";
         } else {
-            error_message.value = "服务器连接失败";
+            error_message.value = "Could not connect to the server";
         }
     }
 
@@ -35,22 +35,22 @@ const login = async () => {
 
 <template>
     <ContentField>
-        <div class="row justify-content-md-center">
-            <div class="col-3">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3">
                 <form @submit.prevent="login">
                     <div class="mb-3">
-                        <label for="username" class="form-label">用户名</label>
-                        <input v-model="username" type="text" class="form-control" id="username" placeholder="请输入用户名">
+                        <label for="username" class="form-label">Username</label>
+                        <input v-model="username" type="text" class="form-control" id="username" placeholder="Enter your username">
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">密码</label>
+                        <label for="password" class="form-label">Password</label>
                         <input v-model="password" type="password" class="form-control" id="password"
-                            placeholder="请输入密码">
+                            placeholder="Enter your password">
                     </div>
                     <div class="error-message">
                         {{ error_message }}
                     </div>
-                    <button type="submit" class="btn btn-primary">登录</button>
+                    <button type="submit" class="btn btn-primary">Log in</button>
                 </form>
             </div>
         </div>

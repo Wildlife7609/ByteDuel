@@ -22,7 +22,7 @@ public class BotRunningController {
         String botCode = (String) Objects.requireNonNull(data.get("bot_code"));
         String input = (String) Objects.requireNonNull(data.get("input"));
         if (language == null)
-            return "不支持的语言";
+            return "Unsupported language";
         return botRunningService.addBot(userId, language, botCode, input);
     }
 
@@ -31,7 +31,7 @@ public class BotRunningController {
         Language language = Language.fromId(data.get("bot_language"));
         String botCode = Objects.requireNonNull(data.get("bot_code"));
         if (language == null)
-            return "不支持的语言";
+            return "Unsupported language";
         return botRunningService.compileBot(language, botCode);
     }
 }

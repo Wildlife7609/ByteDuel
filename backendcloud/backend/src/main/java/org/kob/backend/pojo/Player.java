@@ -41,7 +41,7 @@ public class Player {
         }
     }
 
-    public boolean check_tail_increasing(int step) { // 检查当前回合，蛇的长度是否增加
+    public boolean check_tail_increasing(int step) { // whether the snake grows on this step
         if (step <= 10)
             return true;
         return step % 3 == 1;
@@ -49,7 +49,7 @@ public class Player {
 
     public List<Cell> getCells() {
         List<Cell> res = new ArrayList<>();
-        int[] dx = { -1, 0, 1, 0 }; // 上右下左
+        int[] dx = { -1, 0, 1, 0 }; // up, right, down, left
         int[] dy = { 0, 1, 0, -1 };
         int x = sx, y = sy;
         int step = 0;

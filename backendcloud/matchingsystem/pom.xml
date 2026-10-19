@@ -12,5 +12,5 @@
     <groupId>com.kob.matchingsystem</groupId>
     <artifactId>matchingsystem</artifactId>
 
-    <!-- webmvc、security、lombok 继承自父 pom -->
+    <!-- webmvc, security and lombok come from the parent pom -->
 </project>

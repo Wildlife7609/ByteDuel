@@ -11,15 +11,15 @@ export class GameMap extends AcGameObject {
         this.ctx = ctx;
         this.parent = parent;
         this.gameObject = gameObject;
-        this.L = 0; //绝对像素
+        this.L = 0; // cell size in pixels
 
         this.rows = gameObject.map.length;
         this.cols = gameObject.map[0].length;
-        // 墙要在蛇之前创建：对象按创建顺序绘制，这样蛇头上的名字标签不会被墙挡住
+        // Create walls before snakes: objects are drawn in creation order, so the name labels above the heads are not covered by walls
         this.walls = [];
         this.create_walls();
 
-        // 当前登录用户的蛇，标签上加“（你）”；store 里的 id 是字符串，a_id / b_id 是数字
+        // The logged-in user's snake gets "(you)" on its label; the id in the store is a string, a_id / b_id are numbers
         const myId = String(useUserStore().id);
         this.snakes = [
             new Snake({ id: 0, color: "#EC4899", r: gameObject.a_sx, c: gameObject.a_sy,
@@ -64,14 +64,14 @@ export class GameMap extends AcGameObject {
                     snake1.set_direction(parseInt(b_steps[k]));
                 }
                 k++;
-            }, 300); // 蛇速 5 格/秒，一步约 200ms，300ms 留点余量
+            }, 300); // snakes move 5 cells/s, about 200ms per step; 300ms leaves some margin
         }
         else {
             this.ctx.canvas.focus();
             const pkStore = usePkStore();
-            if (pkStore.selectedBotId !== -1) return; // Bot 出战，不发送键盘操作
+            if (pkStore.selectedBotId !== -1) return; // a bot is playing, so ignore the keyboard
             this.ctx.canvas.addEventListener("keydown", e => {
-                const key = e.key.toLowerCase(); // 开着大写锁定时按键也能生效
+                const key = e.key.toLowerCase(); // so keys still work with Caps Lock on
                 let d = -1;
                 if (key === "w") d = 0;
                 else if (key === "d") d = 1;
@@ -79,10 +79,7 @@ export class GameMap extends AcGameObject {
                 else if (key === "a") d = 3;
 
                 if (d >= 0) {
-                    pkStore.socket.send(JSON.stringify({
-                        event: "move",
-                        direction: d,
-                    }));
+                    pkStore.sendMove(d);
                 }
             });
         }
@@ -109,12 +106,12 @@ export class GameMap extends AcGameObject {
         this.ctx.canvas.height = this.L * this.rows;
     }
 
-    check_valid(cell) { // 检查蛇是否撞墙或撞到自己或撞到对方
+    check_valid(cell) { // check whether the snake hits a wall, itself or the other snake
         if (this.gameObject.map[cell.r][cell.c]) return false;
 
         for (const snake of this.snakes) {
             let k = snake.cells.length;
-            if (!snake.check_tail_increasing()) { // 蛇尾巴不增长的话，就不用检查蛇尾巴了
+            if (!snake.check_tail_increasing()) { // if the tail does not grow this step, it moves away, so skip it
                 k--;
             }
             for (let i = 0; i < k; i++) {
@@ -131,7 +128,7 @@ export class GameMap extends AcGameObject {
         }
     }
 
-    check_ready() { // 检查是否可以走下一步（所有蛇都已静止且都有排队的方向）
+    check_ready() { // ready for the next step: every snake is idle and has a queued direction
         for (const snake of this.snakes) {
             if (snake.status !== "idle") return false;
             if (!snake.has_next_step()) return false;
@@ -148,21 +145,21 @@ export class GameMap extends AcGameObject {
     }
 
     render() {
-        const color_even = "#AAD751"; // 浅草绿
-        const color_odd = "#A2D149";  // 深草绿
+        const color_even = "#AAD751"; // light grass green
+        const color_odd = "#A2D149";  // dark grass green
 
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
-                // 1. 绘制经典棋盘格底色
+                // 1. Checkerboard background
                 this.ctx.fillStyle = (i + j) % 2 === 0 ? color_even : color_odd;
                 this.ctx.fillRect(j * this.L, i * this.L, this.L, this.L);
 
-                // 2. 随机小草点缀（利用固定坐标哈希，保证位置永远稳定）
+                // 2. Grass tufts, placed by a fixed hash of the coordinates so they never move
                 if ((i * 7 + j * 13) % 9 === 0) {
                     const cx = (j + 0.5) * this.L;
                     const cy = (i + 0.5) * this.L;
 
-                    // 画两根可爱的小嫩草苗
+                    // two small blades of grass
                     this.ctx.strokeStyle = "rgba(74, 120, 30, 0.4)";
                     this.ctx.lineWidth = this.L * 0.04;
                     this.ctx.lineCap = "round";

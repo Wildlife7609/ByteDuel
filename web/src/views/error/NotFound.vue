@@ -5,7 +5,7 @@ import ContentField from '@/components/ContentField.vue';
 
 <template>
     <ContentField>
-        404 页面未找到
+        404 Page not found
     </ContentField>
 </template>
 

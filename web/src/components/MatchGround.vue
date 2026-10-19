@@ -6,26 +6,26 @@ import axios from 'axios';
 
 const userStore = useUserStore();
 const pkStore = usePkStore();
-const matchBtnText = ref("开始匹配");
+const matchBtnText = ref("Find match");
 const bots = ref([]);
 
 axios.get("/user/bot/getlist/").then(resp => {
     bots.value = resp.data;
 }).catch(error => {
-    console.log("获取Bot列表失败：", error);
+    console.log("Failed to load bots:", error);
 })
 
 const click_match_btn = () => {
-    if (matchBtnText.value === "开始匹配") {
-        matchBtnText.value = "取消";
-        // 向后端发送开始匹配消息，并传递选中的 bot_id
+    if (matchBtnText.value === "Find match") {
+        matchBtnText.value = "Cancel";
+        // tell the backend to start matching, with the selected bot_id
         pkStore.socket?.send(JSON.stringify({
             event: "start-matching",
-            bot_id: pkStore.selectedBotId,  // 传递选中的 bot_id
+            bot_id: pkStore.selectedBotId,  // -1 means playing manually
         }));
     } else {
-        matchBtnText.value = "开始匹配";
-        // 向后端发送取消匹配消息
+        matchBtnText.value = "Find match";
+        // tell the backend to stop matching
         pkStore.socket?.send(JSON.stringify({
             event: "stop-matching",
         }));
@@ -35,53 +35,54 @@ const click_match_btn = () => {
 </script>
 
 <template>
+    <!-- Desktop: you | VS above the controls | opponent. Phone: you | VS | opponent, with the controls below -->
     <div class="matchground">
-        <div class="row align-items-center h-100">
-            <!-- 左侧：自己 -->
-            <div class="col-4 text-center">
-                <div class="user-photo">
-                    <img :src="userStore.photo" alt="">
-                </div>
-                <div class="user-username">{{ userStore.username }}</div>
+        <div class="player me">
+            <div class="user-photo">
+                <img :src="userStore.photo" alt="">
             </div>
-            <!-- 中间：VS 与出战配置 -->
-            <div class="col-4 text-center middle-panel">
-                <div class="vs-badge">VS</div>
-                <div class="user-select-bot my-4">
-                    <select class="form-select select-bot" v-model="pkStore.selectedBotId">
-                        <option :value="-1">亲自出战</option>
-                        <option v-for="bot in bots" :key="bot.id" :value="bot.id">
-                            {{ bot.title }}
-                        </option>
-                    </select>
-                    <!-- 亲自出战时的操作提示 -->
-                    <div v-if="pkStore.selectedBotId === -1" class="play-tip">
-                        <div><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> 控制上 / 左 / 下 / 右</div>
-                        <div>每回合 5 秒内必须操作，超时判负</div>
-                        <div>按键没反应：先点一下地图，并切换到英文输入法</div>
-                    </div>
-                </div>
-                <button @click="click_match_btn" type="button" class="btn btn-warning btn-lg match-btn">
-                    {{ matchBtnText }}
-                </button>
+            <div class="user-username">{{ userStore.username }}</div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div class="controls">
+            <select class="form-select select-bot" v-model="pkStore.selectedBotId">
+                <option :value="-1">Play manually</option>
+                <option v-for="bot in bots" :key="bot.id" :value="bot.id">
+                    {{ bot.title }}
+                </option>
+            </select>
+            <!-- Controls hint for manual play; keyboard or touch lines are hidden by the CSS -->
+            <div v-if="pkStore.selectedBotId === -1" class="play-tip">
+                <div class="tip-keyboard"><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to move</div>
+                <div class="tip-touch">Use the arrow buttons below the board</div>
+                <div>5 seconds per turn, or you lose</div>
+                <div class="tip-keyboard">Keys not working? Click the board</div>
             </div>
-            <!-- 右侧：对手 -->
-            <div class="col-4 text-center">
-                <div class="user-photo">
-                    <img :src="pkStore.opponentPhoto" alt="">
-                </div>
-                <div class="user-username">{{ pkStore.opponentUsername }}</div>
+            <button @click="click_match_btn" type="button" class="btn btn-warning btn-lg match-btn">
+                {{ matchBtnText }}
+            </button>
+        </div>
+        <div class="player opponent">
+            <div class="user-photo">
+                <img :src="pkStore.opponentPhoto" alt="">
             </div>
+            <div class="user-username">{{ pkStore.opponentUsername }}</div>
         </div>
     </div>
 </template>
 
 <style scoped>
 div.matchground {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+        "me vs opponent"
+        "me controls opponent";
+    align-content: center;
     width: 65vw;
     height: 60vh;
     margin: 3.5rem auto;
-    /* 现代高级毛玻璃效果 */
+    /* frosted glass */
     background: rgba(30, 41, 59, 0.7);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -93,11 +94,11 @@ div.matchground {
 div.user-photo>img {
     border-radius: 50%;
     width: 16vh;
-    max-width: 100%; /* 不超过所在列的宽度 */
+    max-width: 100%; /* no wider than its column */
     height: auto;
-    aspect-ratio: 1 / 1; /* 始终保持正方形，圆形头像不变形 */
+    aspect-ratio: 1 / 1; /* keep it square so the round avatar is not distorted */
     object-fit: cover;
-    /* 头像光晕描边与立体阴影 */
+    /* glow ring and drop shadow */
     border: 5px solid rgba(255, 255, 255, 0.8);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
@@ -114,6 +115,9 @@ div.user-username {
 
 
 .vs-badge {
+    grid-area: vs;
+    align-self: end;
+    text-align: center;
     font-size: 48px;
     font-weight: 900;
     font-style: italic;
@@ -121,13 +125,35 @@ div.user-username {
     text-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
 }
 
-.user-select-bot {
+.player {
+    align-self: center;
+    min-width: 0; /* let long usernames shrink instead of widening the column */
+    text-align: center;
+}
+
+.player.me {
+    grid-area: me;
+}
+
+.player.opponent {
+    grid-area: opponent;
+}
+
+.controls {
+    grid-area: controls;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.select-bot {
     width: 70%;
-    margin: 1.5rem auto;
+    margin-top: 1.5rem;
 }
 
 .play-tip {
     margin-top: 0.8rem;
+    text-align: center;
     font-size: 13px;
     line-height: 1.8;
     color: rgba(255, 255, 255, 0.75);
@@ -139,7 +165,23 @@ div.user-username {
     color: #ffffff;
 }
 
+.tip-touch {
+    display: none;
+}
+
+/* touch devices get on-screen arrows instead of the keyboard */
+@media (hover: none) and (pointer: coarse) {
+    .tip-keyboard {
+        display: none;
+    }
+
+    .tip-touch {
+        display: block;
+    }
+}
+
 .match-btn {
+    margin-top: 1.5rem;
     padding: 0.6rem 2.2rem;
     font-size: 1.15rem;
     font-weight: 700;
@@ -151,5 +193,42 @@ div.user-username {
 .match-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 24px rgba(245, 158, 11, 0.5);
+}
+
+@media (max-width: 767.98px) {
+    div.matchground {
+        grid-template-columns: 1fr auto 1fr;
+        grid-template-areas:
+            "me vs opponent"
+            "controls controls controls";
+        column-gap: 0.5rem;
+        width: calc(100vw - 32px);
+        height: auto;
+        margin: 1.5rem auto;
+        padding: 1.5rem 1rem;
+    }
+
+    div.user-photo>img {
+        width: 88px;
+        border-width: 3px;
+    }
+
+    div.user-username {
+        font-size: 16px;
+        margin-top: 0.6rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .vs-badge {
+        align-self: center;
+        font-size: 32px;
+    }
+
+    .select-bot {
+        width: 100%;
+        max-width: 280px;
+    }
 }
 </style>

@@ -1,4 +1,4 @@
-# 前端镜像：用 Node 打包出静态文件，再交给 Caddy 提供页面并反向代理 backend
+# Frontend image: build the static files with Node, then serve them with Caddy, which also reverse-proxies backend
 FROM --platform=$BUILDPLATFORM node:22-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./

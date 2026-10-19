@@ -6,19 +6,19 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 
-// 登录失败次数限制，防止暴力破解密码：同一个用户名在 WINDOW 内输错 MAX_FAILURES 次，锁定 LOCK_DURATION
-// 计数由 LoginAttemptListener 根据 Spring Security 的登录事件更新；锁定状态通过 UserDetailsImpl.isAccountNonLocked()
-// 交给 Spring Security，被锁定时它在校验密码之前就会拒绝登录（抛出 LockedException）
-// 按用户名而不是按 IP 计数：请求经过 Cloudflare 和 Caddy 转发，backend 拿到的 IP 不是用户的真实 IP
-// 计数只存在内存里：backend 只有一个实例，重启后清零也没关系
+// Limits failed logins to stop password brute-forcing: MAX_FAILURES failures for one username within WINDOW locks it for LOCK_DURATION
+// LoginAttemptListener updates the counts from Spring Security's login events; the lock is passed to Spring Security through UserDetailsImpl.isAccountNonLocked(),
+// which rejects a locked account before checking the password (throwing LockedException)
+// Counted per username rather than per IP: requests pass through Cloudflare and Caddy, so backend does not see the user's real IP
+// Counts live only in memory: backend runs a single instance, and resetting on restart is fine
 @Component
 public class LoginAttemptLimiter {
     private static final int MAX_FAILURES = 5;
     private static final Duration WINDOW = Duration.ofMinutes(10);
     public static final Duration LOCK_DURATION = Duration.ofMinutes(10);
-    private static final int MAX_ENTRIES = 100_000; // 防止有人用大量随机用户名把内存撑满
+    private static final int MAX_ENTRIES = 100_000; // keeps random usernames from filling up memory
 
-    // firstFailure：这一轮计数开始的时间；lockedUntil：锁定到什么时候，没锁定是 null
+    // firstFailure: when the current window started; lockedUntil: when the lock ends, or null if not locked
     private record Attempt(int failures, Instant firstFailure, Instant lockedUntil) {
         boolean expired(Instant now) {
             if (lockedUntil != null)
@@ -40,7 +40,7 @@ public class LoginAttemptLimiter {
             attempts.values().removeIf(attempt -> attempt.expired(now));
         attempts.compute(username, (key, attempt) -> {
             if (attempt == null || attempt.expired(now))
-                attempt = new Attempt(0, now, null); // 上一轮过期了，重新计数
+                attempt = new Attempt(0, now, null); // the previous window expired, start over
             int failures = attempt.failures() + 1;
             Instant lockedUntil = failures >= MAX_FAILURES ? now.plus(LOCK_DURATION) : null;
             return new Attempt(failures, attempt.firstFailure(), lockedUntil);

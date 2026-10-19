@@ -11,10 +11,10 @@ const totalUsers = ref(0)
 const currentPage = ref(1)
 const PAGE_SIZE = 3
 const totalPages = computed(() => Math.ceil(totalUsers.value / PAGE_SIZE))
-const loaded = ref(false) // 首次请求返回前不显示空状态，避免闪一下"暂无对局记录"
+const loaded = ref(false) // Hide the empty state until the first response arrives, so it does not flash briefly
 
-// 多页时最后一页不满，用一行"没有更多记录了"占满剩余高度，保持表格高度不变，分页条不会跳动
-const ROW_HEIGHT = 57 // 真实行高：头像 40px + 上下内边距 16px + 边框 1px
+// With several pages, fill the short last page with a "No more records" row so the table keeps its height and the pagination bar does not jump
+const ROW_HEIGHT = 57 // actual row height: 40px avatar + 16px vertical padding + 1px border
 const emptyRows = computed(() => totalPages.value > 1 ? PAGE_SIZE - users.value.length : 0)
 
 const pages = computed(() => {
@@ -31,7 +31,7 @@ const go_page = (page) => {
     pull_page(page);
 };
 
-// 1. 获取用户列表
+// 1. Load the user list
 const pull_page = async (page) => {
     currentPage.value = page;
     try {
@@ -42,16 +42,16 @@ const pull_page = async (page) => {
         totalUsers.value = res.data.total;
         loaded.value = true;
     } catch (error) {
-        console.log("获取用户列表失败：", error);
+        console.log("Failed to load users:", error);
     }
 }
 
-// 全局排名 = 前面几页的人数 + 本页序号
+// overall rank = users on earlier pages + position on this page
 const rankOf = (index) => (currentPage.value - 1) * PAGE_SIZE + index + 1;
 
 const totalGames = (user) => user.winCount + user.loseCount + user.drawCount;
 
-// 平局计入总场数但不算胜；没打过对局时显示 "—"，避免除以 0
+// Draws count toward total games but not wins; show "—" when there are no games, to avoid dividing by 0
 const winRate = (user) => {
     const total = totalGames(user);
     if (total === 0) return "—";
@@ -65,22 +65,23 @@ pull_page(currentPage.value);
 
 <template>
     <ContentField>
-        <!-- 空状态提示 -->
+        <!-- Empty state -->
         <div v-if="loaded && totalUsers === 0" class="text-center py-5 text-muted">
-            <p class="mb-2 fs-5">暂无用户记录</p>
-            <p class="mb-0">平台上还没有任何用户，快去注册一个吧！</p>
+            <p class="mb-2 fs-5">No players yet</p>
+            <p class="mb-0">Nobody has signed up yet. Be the first!</p>
         </div>
 
-        <!-- User 列表表格 -->
-        <table v-else-if="totalUsers > 0" class="table table-striped table-hover align-middle text-center">
+        <!-- User table -->
+        <div v-else-if="totalUsers > 0" class="table-responsive">
+        <table class="table table-striped table-hover align-middle text-center">
             <thead>
                 <tr>
-                    <th scope="col" style="width: 18%;">排名</th>
+                    <th scope="col" style="width: 18%;">Rank</th>
                     <th scope="col" style="width: 27%;">
-                        <div class="player-cell">玩家</div>
+                        <div class="player-cell">Player</div>
                     </th>
-                    <th scope="col" style="width: 25%;">天梯分</th>
-                    <th scope="col" style="width: 30%;">胜率</th>
+                    <th scope="col" style="width: 25%;">Rating</th>
+                    <th scope="col" style="width: 30%;">Win rate</th>
                 </tr>
             </thead>
             <tbody>
@@ -96,17 +97,18 @@ pull_page(currentPage.value);
                     <td>{{ item.rating }}</td>
                     <td>
                         {{ winRate(item) }}
-                        <span class="text-muted small ms-1">（{{ totalGames(item) }} 局）</span>
+                        <span class="text-muted small text-nowrap ms-md-1 d-block d-md-inline">({{ totalGames(item) }} games)</span>
                     </td>
                 </tr>
                 <tr v-if="emptyRows > 0" class="no-more-row">
                     <td colspan="4" class="text-muted" :style="{ height: emptyRows * ROW_HEIGHT + 'px' }">
-                        没有更多记录了
+                        No more records
                     </td>
                 </tr>
             </tbody>
         </table>
-        <nav v-if="totalPages > 1" aria-label="排行榜分页">
+        </div>
+        <nav v-if="totalPages > 1" aria-label="Ranklist pages">
             <ul class="pagination" style="justify-content: center; margin-top: 30px;">
                 <li class="page-item" :class="{ disabled: currentPage === 1}">
                 <a class="page-link" href="#" aria-label="Previous" @click.prevent="go_page(currentPage - 1)">
@@ -129,7 +131,7 @@ pull_page(currentPage.value);
 </template>
 
 <style scoped>
-/* 固定宽度 + 左对齐，再整体居中：头像排成一列，不随用户名长短左右错开 */
+/* Fixed width, left-aligned, then centered as a block: avatars line up in a column regardless of username length */
 .player-cell {
     display: flex;
     align-items: center;
@@ -149,5 +151,19 @@ pull_page(currentPage.value);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* phones: drop the fixed width so all four columns fit */
+@media (max-width: 767.98px) {
+    .player-cell {
+        width: auto;
+        max-width: 120px;
+    }
+
+    .player-photo {
+        width: 32px;
+        height: 32px;
+        margin-right: 6px;
+    }
 }
 </style>

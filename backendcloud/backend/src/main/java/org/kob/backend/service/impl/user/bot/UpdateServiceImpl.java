@@ -34,12 +34,12 @@ public class UpdateServiceImpl implements UpdateService {
         Map<String, String> map = new HashMap<>();
 
         if (bot == null) {
-            map.put("error_message", "Bot不存在或已被删除");
+            map.put("error_message", "Bot does not exist or was already deleted");
             return map;
         }
 
         if (!bot.getUserId().equals(user.getId())) {
-            map.put("error_message", "没有权限修改该Bot！");
+            map.put("error_message", "You do not have permission to edit this bot.");
             return map;
         }
 
@@ -49,30 +49,30 @@ public class UpdateServiceImpl implements UpdateService {
         String language = data.get("language");
 
         if (title == null || title.isBlank()) {
-            map.put("error_message", "标题不能为空");
+            map.put("error_message", "Bot name cannot be empty");
             return map;
         }
         if (title.length() > 100) {
-            map.put("error_message", "标题长度不能大于100");
+            map.put("error_message", "Bot name cannot exceed 100 characters");
             return map;
         }
         if (description == null || description.isBlank()) {
-            description = "这个用户很懒，什么也没留下~";
+            description = "No description provided.";
         }
         if (description.length() > 300) {
-            map.put("error_message", "描述长度不能大于300");
+            map.put("error_message", "Bot description cannot exceed 300 characters");
             return map;
         }
         if (content == null || content.isBlank()) {
-            map.put("error_message", "内容不能为空");
+            map.put("error_message", "Bot code cannot be empty");
             return map;
         }
         if (content.length() > 10000) {
-            map.put("error_message", "内容长度不能大于10000");
+            map.put("error_message", "Bot code cannot exceed 10,000 characters");
             return map;
         }
         if (language == null || !BotCodeChecker.LANGUAGES.contains(language)) {
-            map.put("error_message", "不支持的语言");
+            map.put("error_message", "Unsupported language");
             return map;
         }
         String compileError = botCodeChecker.check(language, content);

@@ -6,7 +6,7 @@ export class Wall extends AcGameObject {
         this.r = r;
         this.c = c;
         this.gamemap = gamemap;
-        this.color = "#475569"; // 温暖胡桃木色
+        this.color = "#475569"; // slate gray
 
     }
 

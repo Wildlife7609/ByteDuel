@@ -32,11 +32,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    @Qualifier("matchingClient") // 有两个 RestClient，按名字指定用哪一个
+    @Qualifier("matchingClient") // there are two RestClients, so pick one by name
     private RestClient matchingClient;
 
 
-    @Override // 相当于 @OnOpen（建立连接）
+    @Override // equivalent to @OnOpen
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String path = session.getUri().getPath();
         String token = path.substring(path.lastIndexOf("/") + 1);
@@ -56,25 +56,25 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Player player = new Player(user, session);
         playerManager.addPlayer(player);
 
-        if (oldPlayer != null) { // 同一账号只允许一个在线连接，踢掉旧的
+        if (oldPlayer != null) { // one connection per account: close the old one
             try {
                 oldPlayer.getSession().close(new CloseStatus(4000, "kicked"));
-                // 旧连接关闭时 stopMatching 会因为 session 不匹配而跳过，所以在这里把该用户移出匹配池
+                // when the old connection closes, stopMatching skips it because the session does not match, so remove the user from the matching pool here
                 removeFromMatchingPool(userId);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        System.out.println("玩家连接成功: " + user.getUsername());
+        System.out.println("Player connected: " + user.getUsername());
     }
 
     private void startMatching(Integer userId, Integer botId) {
-        System.out.println("开始匹配");
+        System.out.println("Start matching");
         Player player = playerManager.getPlayer(userId);
         if (player == null)
             return;
         Game game = player.getGame();
-        if (game != null && game.isPlaying()) // 上一局还没结束，不能开新的一局
+        if (game != null && game.isPlaying()) // the previous game is still running, so no new game
             return;
         Bot bot = null;
         if (botId != -1) {
@@ -92,9 +92,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     private void stopMatching(Integer userId, WebSocketSession session) {
-        System.out.println("取消匹配");
+        System.out.println("Stop matching");
         Player player = playerManager.getPlayer(userId);
-        if (player == null || player.getSession() != session) // 只处理这个连接自己的 player，不误删同一用户新建立的连接
+        if (player == null || player.getSession() != session) // only handle this connection's own player, not a newer connection from the same user
             return;
         removeFromMatchingPool(userId);
     }
@@ -117,10 +117,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    @Override // 相当于 @OnMessage（收到消息）
+    @Override // equivalent to @OnMessage
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println("收到消息");
-        JsonNode data = objectMapper.readTree(message.getPayload());// 通常把message 当作路由
+        System.out.println("Message received");
+        JsonNode data = objectMapper.readTree(message.getPayload()); // the event field acts as a route
         String event = data.get("event").asString();
         Integer userId = (Integer) session.getAttributes().get("userId");
         if ("start-matching".equals(event)) {
@@ -133,7 +133,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    @Override // 相当于 @OnClose（断开连接）
+    @Override // equivalent to @OnClose
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Integer userId = (Integer) session.getAttributes().get("userId");
         if (userId == null) return;
@@ -141,11 +141,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
             stopMatching(userId, session);
         } finally {
             playerManager.removePlayer(userId,session);
-            System.out.println("玩家断开连接: " + userId);
+            System.out.println("Player disconnected: " + userId);
         }
     }
 
-    @Override // 相当于 @OnError（通信异常）
+    @Override // equivalent to @OnError
     public void handleTransportError(WebSocketSession session, Throwable exception) {
         exception.printStackTrace();
     }

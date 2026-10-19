@@ -29,7 +29,7 @@ public class BotRunningServiceImpl implements BotRunningService {
             return error == null ? "success" : error;
         } catch (RestClientException e) {
             e.printStackTrace();
-            return "Bot 编译服务暂不可用，请稍后重试";
+            return "The bot compiler is unavailable. Please try again later.";
         }
     }
 }

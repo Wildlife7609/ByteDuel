@@ -3,20 +3,20 @@ const AC_Game_OBJECTS = [];
 export default class AcGameObject {
     constructor() {
         AC_Game_OBJECTS.push(this);
-        this.has_called_start = false; //是否执行过start
-        this.timedelta = 0; //上一帧到当前帧的时间间隔
+        this.has_called_start = false; // whether start() has run
+        this.timedelta = 0; // time since the previous frame
     }
 
-    start() { //创建时执行一次
+    start() { // runs once, on the first frame
     }
 
-    update() { //每一帧执行一次，除了第一帧
+    update() { // runs every frame except the first
 
     }
-    on_destroy() { //当对象被销毁时，执行一次
+    on_destroy() { // runs once, when the object is destroyed
     }
 
-    destroy() { //销毁时执行一次
+    destroy() { // removes the object
         this.on_destroy();
         for (let i in AC_Game_OBJECTS) {
             if (AC_Game_OBJECTS[i] === this) {
@@ -27,7 +27,7 @@ export default class AcGameObject {
     }
 }
 
-let last_timestamp = 0; //上一帧到当前帧的时间间隔
+let last_timestamp = 0; // timestamp of the previous frame
 
 const step = (timestamp) => {
     for (let obj of AC_Game_OBJECTS) {

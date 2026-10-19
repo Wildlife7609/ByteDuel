@@ -24,9 +24,9 @@ const register = async () => {
         }
     } catch (error) {
         if (error.response && error.response.status === 429) {
-            error_message.value = "请求过于频繁，请稍后再试"; // 被 Cloudflare 限流
+            error_message.value = "Too many requests. Please try again later."; // rate limited by Cloudflare
         } else {
-            error_message.value = "服务器连接失败";
+            error_message.value = "Could not connect to the server";
         }
     }
 }
@@ -35,27 +35,27 @@ const register = async () => {
 
 <template>
     <ContentField>
-        <div class="row justify-content-md-center">
-            <div class="col-3">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3">
                 <form @submit.prevent="register">
                     <div class="mb-3">
-                        <label for="username" class="form-label">用户名</label>
-                        <input v-model="username" type="text" class="form-control" id="username" placeholder="请输入用户名">
+                        <label for="username" class="form-label">Username</label>
+                        <input v-model="username" type="text" class="form-control" id="username" placeholder="Choose a username">
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">密码</label>
+                        <label for="password" class="form-label">Password</label>
                         <input v-model="password" type="password" class="form-control" id="password"
-                            placeholder="请输入密码">
+                            placeholder="Choose a password">
                     </div>
                     <div class="mb-3">
-                        <label for="confirmedPassword" class="form-label">确认密码</label>
+                        <label for="confirmedPassword" class="form-label">Confirm password</label>
                         <input v-model="confirmedPassword" type="password" class="form-control" id="confirmedPassword"
-                            placeholder="请再次输入密码">
+                            placeholder="Enter the password again">
                     </div>
                     <div class="error-message">
                         {{ error_message }}
                     </div>
-                    <button type="submit" class="btn btn-primary">注册</button>
+                    <button type="submit" class="btn btn-primary">Sign up</button>
                 </form>
             </div>
         </div>

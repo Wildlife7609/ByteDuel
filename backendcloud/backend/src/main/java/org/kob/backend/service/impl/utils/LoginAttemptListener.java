@@ -6,8 +6,8 @@ import org.springframework.security.authentication.event.AuthenticationFailureBa
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
 
-// 监听 Spring Security 的登录事件，更新登录失败次数（见 LoginAttemptLimiter）
-// 用户名不存在也算密码错误（Spring Security 默认不区分这两种情况），所以一样会被计数
+// Listens to Spring Security's login events and updates the failed-login counts (see LoginAttemptLimiter)
+// An unknown username is reported as a bad password (Spring Security does not distinguish them by default), so it is counted too
 @Component
 public class LoginAttemptListener {
     @Autowired

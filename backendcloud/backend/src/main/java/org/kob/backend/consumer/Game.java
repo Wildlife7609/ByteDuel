@@ -28,11 +28,11 @@ public class Game extends Thread {
     private Integer nextStepP2 = null;
     private final ReentrantLock lock = new ReentrantLock();
 
-    private volatile String status = "playing"; // "playing" : 游戏进行中, "finished" : 游戏结束。WebSocket 线程也会读
-    private String loser = ""; // "all": 平局, "A" : A 输, "B" : B 输
+    private volatile String status = "playing"; // "playing" or "finished"; also read by WebSocket threads
+    private String loser = ""; // "all": draw, "A": A lost, "B": B lost
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final RecordMapper recordMapper; // 以下都是Game 是 new 出来的，不能 @Autowired，由 StartGameServiceImpl 传入
+    private final RecordMapper recordMapper; // Game is created with new, not by Spring, so these cannot be @Autowired; StartGameServiceImpl passes them in
     private final RestClient botRunningClient; 
     private final UserMapper userMapper; // 
 
@@ -90,7 +90,7 @@ public class Game extends Thread {
         }
     }
 
-    private String getInput(Player player) { //将当前的局面信息，编码成字符串
+    private String getInput(Player player) { // encode the current game state as a string
         Player me = player, you = (player == p1) ? p2 : p1;
     return getMapString() + "#"
             + me.getSx() + "#" + me.getSy() + "#(" + getStepsString(me) + ")#"
@@ -116,10 +116,10 @@ public class Game extends Thread {
         }
     }
 
-    // 对局开始前让 botrunningsystem 把双方的 Bot 编译好。服务重启后编译缓存会丢失，
-    // Go 编译要好几秒，放到第一回合现场编译会超过每回合 5 秒的限制
+    // Have botrunningsystem compile both bots before the game starts. The compile cache is lost when the service restarts,
+    // and compiling Go takes several seconds, which would blow the 5-second limit if done during the first turn
     private void prepareBots() {
-        Thread t1 = Thread.ofVirtual().start(() -> prepareBot(p1)); // 两个 Bot 同时编译
+        Thread t1 = Thread.ofVirtual().start(() -> prepareBot(p1)); // compile both bots in parallel
         Thread t2 = Thread.ofVirtual().start(() -> prepareBot(p2));
         try {
             t1.join();
@@ -137,7 +137,7 @@ public class Game extends Thread {
         try {
             botRunningClient.post().uri("/bot/compile/").body(data).retrieve().toBodilessEntity();
         } catch (Exception e) {
-            e.printStackTrace(); // 预热失败不影响开局，最多第一回合现场编译
+            e.printStackTrace(); // a failed warm-up does not block the game; worst case it compiles on the first turn
         }
     }
 
@@ -148,7 +148,7 @@ public class Game extends Thread {
         return sb.toString();
     }
 
-    private String getMapString() { // 按行拼成一串 0/1
+    private String getMapString() { // the board as a row-by-row string of 0s and 1s
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
@@ -164,7 +164,7 @@ public class Game extends Thread {
         userMapper.updateById(user);
     }
 
-    // 让数据库自增，不依赖开局时加载的用户数据；column 只由本类传入固定列名
+    // Increment in the database instead of relying on the user data loaded at game start; column is always a fixed name passed by this class
     private void incrementResultCount(Player player, String column) {
         UpdateWrapper<User> wrapper = new UpdateWrapper<>();
         wrapper.eq("id", player.getUser().getId())
@@ -209,16 +209,16 @@ public class Game extends Thread {
 
     private void sendResult() {
         try {
-            saveToDatabase(); // 先存库，再通知前端
+            saveToDatabase(); // save first, then notify the clients
         } catch (Exception e) {
-            e.printStackTrace(); // 存库失败也要把结果发给前端
+            e.printStackTrace(); // send the result to the clients even if saving fails
         }
         ObjectNode resp = objectMapper.createObjectNode();
         resp.put("event", "result");
         resp.put("loser", loser);
         lock.lock();
         try {
-            resp.put("a_step", nextStepP1); // 最后一步的方向，前端用来转眼睛
+            resp.put("a_step", nextStepP1); // direction of the last move; the frontend uses it to turn the eyes
             resp.put("b_step", nextStepP2);
         } finally {
             lock.unlock();
@@ -227,7 +227,7 @@ public class Game extends Thread {
 
     }
 
-    private void sendMove() { // 发送玩家下一步操作
+    private void sendMove() { // send both players' next moves
         lock.lock();
         try {
             ObjectNode resp = objectMapper.createObjectNode();
@@ -241,8 +241,8 @@ public class Game extends Thread {
         }
     }
 
-    private void sendMessageToAll(String message) { // 发送地图信息和玩家操作信息给所有玩家
-        // 玩家已经进入了新的一局，就不再给他发这一局的消息，免得前端把两局的结果混在一起
+    private void sendMessageToAll(String message) { // send a message to both players
+        // Skip a player who has already started a new game, so the frontend does not mix up the two games
         if (p1.getGame() == this)
             p1.sendMessage(message);
         if (p2.getGame() == this)
@@ -253,17 +253,17 @@ public class Game extends Thread {
         int n = cellsA.size();
         Cell cell = cellsA.get(n - 1);
         if (g[cell.getX()][cell.getY()] == 1)
-            return false; // 撞墙
+            return false; // hit a wall
         for (int i = 0; i < n - 1; i++) {
             if (cellsA.get(i).getX() == cell.getX() && cellsA.get(i).getY() == cell.getY())
-                return false; // 撞到自己
+                return false; // hit itself
             if (cellsB.get(i).getX() == cell.getX() && cellsB.get(i).getY() == cell.getY())
-                return false; // 撞到对方
+                return false; // hit the other snake
         }
         return true;
     }
 
-    private void judge() { // 判断两个玩家下一步操作是否合法
+    private void judge() { // check whether both players' next moves are valid
         List<Cell> cellsA = p1.getCells();
         List<Cell> cellsB = p2.getCells();
         boolean vaildA = check_valid(cellsA, cellsB);
@@ -348,8 +348,8 @@ public class Game extends Thread {
         return g;
     }
 
-    // BFS，每个格子最多访问一次。不能用回溯的 DFS（走完把格子标回 0）：那样会穷举所有路径，
-    // 地图连通性差时要跑几秒甚至更久，开局请求被卡住，玩家以为没匹配上又重新匹配，导致两局同时进行
+    // BFS visits each cell at most once. A backtracking DFS (unmarking cells on the way back) would enumerate every path:
+    // on a poorly connected map it can run for seconds or longer, stalling game start, so players re-queue and end up in two games at once
     private boolean check_connectivity(int sx, int sy, int tx, int ty) {
         boolean[][] visited = new boolean[rows][cols];
         ArrayDeque<int[]> queue = new ArrayDeque<>();

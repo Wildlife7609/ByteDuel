@@ -11,14 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-@Component // 必须交给 Spring 管理，@Autowired 才会生效
+@Component // must be a Spring bean for @Autowired to work
 public class MatchingPool extends Thread {
     @Autowired
     private RestClient backendClient;
     private final List<Player> players = new ArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
 
-    @PostConstruct // 依赖注入完成后再启动线程，保证 backendClient 已就绪
+    @PostConstruct // start the thread after injection, so backendClient is ready
     public void init() {
         start();
     }
@@ -48,7 +48,7 @@ public class MatchingPool extends Thread {
         }
     }
 
-    // 尝试匹配所有玩家，返回配好的对，由调用方在释放锁之后通知 backend
+    // Try to match every player and return the pairs; the caller notifies backend after releasing the lock
     private List<Player[]> matchPlayers() {
         System.out.println("MatchingPool matchPlayers " + players.toString());
         List<Player[]> matched = new ArrayList<>();
@@ -82,7 +82,7 @@ public class MatchingPool extends Thread {
         return matched;
     }
 
-    private void sendResult(Player a, Player b) { // 发送匹配结果
+    private void sendResult(Player a, Player b) { // send a match to backend
         System.out.println("MatchingPool sendResult " + a.getUserId() + " " + b.getUserId());
         Map<String, Integer> data = new HashMap<>();
         data.put("a_id", a.getUserId());
@@ -90,7 +90,7 @@ public class MatchingPool extends Thread {
         try {
             backendClient.post().uri("/pk/start/game/").body(data).retrieve().toBodilessEntity();
         } catch (Exception e) {
-            e.printStackTrace(); // 通知 backend 失败，不能让匹配线程退出
+            e.printStackTrace(); // failing to notify backend must not kill the matching thread
         }
     }
 
@@ -107,7 +107,7 @@ public class MatchingPool extends Thread {
                 } finally {
                     lock.unlock();
                 }
-                // 通知 backend 时不能拿着锁：backend 响应慢的话，加入、取消匹配的请求都会被卡住
+                // Do not hold the lock while notifying backend: if backend is slow, requests to join or leave matching would be blocked
                 for (Player[] pair : matched)
                     sendResult(pair[0], pair[1]);
             } catch (InterruptedException e) {

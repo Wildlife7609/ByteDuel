@@ -6,32 +6,32 @@ export class Snake extends AcGameObject {
         super();
         this.id = info.id;
         this.color = info.color
-        this.username = info.username || ""; // 显示在蛇头上方
-        this.is_me = info.is_me || false; // 是不是当前登录用户的蛇
+        this.username = info.username || ""; // shown above the head
+        this.is_me = info.is_me || false; // whether this is the logged-in user's snake
         this.gamemap = gamemap;
 
-        this.cells = [new Cell(info.r, info.c)]; // 蛇的身体
-        this.next_cell = null; // 下一步要添加的位置
-        this.speed = 5; // 蛇移动速度, 每秒移动5个格子
-        // 收到但还没走的方向，0:上, 1:右, 2:下, 3:左。上一步动画没走完时新方向会先排队，
-        // 不能只存一个方向：切到后台标签页时动画会暂停，后面的方向会把前面的覆盖掉，画面就和后端对不上了
+        this.cells = [new Cell(info.r, info.c)]; // body cells, head first
+        this.next_cell = null; // cell the head is moving to
+        this.speed = 5; // cells per second
+        // Directions received but not yet taken (0: up, 1: right, 2: down, 3: left). A new direction waits here while the previous step is still animating.
+        // A single slot is not enough: animation pauses in a background tab, later directions would overwrite earlier ones, and the board would drift out of sync with the backend.
         this.directions = [];
-        this.result = null; // 对局结果，等排队的方向都走完再生效：{ dead, eye_direction }
-        this.status = "idle"; // "idle" : 静止, "move" : 移动, "die" : 死亡
+        this.result = null; // game result, applied after the queued directions are played: { dead, eye_direction }
+        this.status = "idle"; // "idle", "move" or "die"
 
-        this.dr = [-1, 0, 1, 0]; // row 变化量，对应 0, 1, 2, 3
-        this.dc = [0, 1, 0, -1]; // col 变化量，对应 0, 1, 2, 3
+        this.dr = [-1, 0, 1, 0]; // row delta for directions 0, 1, 2, 3
+        this.dc = [0, 1, 0, -1]; // col delta for directions 0, 1, 2, 3
 
-        this.step = 0; // 步数
-        this.eps = 1e-2; // 精度误差
+        this.step = 0; // number of steps taken
+        this.eps = 1e-2; // distance tolerance
 
-        this.eye_direction = 0; // 默认朝上
+        this.eye_direction = 0; // facing up by default
         if (this.id === 1) {
-            this.eye_direction = 2; // 右上角蛇，眼睛朝下
+            this.eye_direction = 2; // the top-right snake starts facing down
         }
-        // 眼睛相对蛇头的偏移量, 0.15
+        // eye offsets from the head center, for each direction
         this.eye_dx = [
-            [-1, 1], // 眼睛相对蛇头的偏移量
+            [-1, 1],
             [1, 1],
             [1, -1],
             [-1, -1]
@@ -55,27 +55,27 @@ export class Snake extends AcGameObject {
         return this.directions.length > 0;
     }
 
-    // 对局结束：dead 表示这条蛇输了，eye_direction 是最后一步想走的方向（可以为空）
+    // Game over: dead means this snake lost; eye_direction is the direction of its last attempted move (may be empty)
     finish(dead, eye_direction) {
         this.result = { dead, eye_direction };
     }
 
-    apply_result() { // 排队的方向都走完了，再显示结果
+    apply_result() { // show the result once the queued directions are played
         if (!this.result || this.status !== "idle" || this.has_next_step()) return;
         if (this.result.eye_direction != null) this.eye_direction = this.result.eye_direction;
         if (this.result.dead) this.status = "die";
         this.result = null;
     }
 
-    check_tail_increasing() { // 检查蛇尾是否增长
-        if (this.step <= 10) return true; // 蛇头每走一步，身体向后移一格，
-        if (this.step % 3 === 1) return true; // 蛇每走3步，蛇尾增长一格
+    check_tail_increasing() { // whether the snake grows on this step
+        if (this.step <= 10) return true; // grows on each of the first 10 steps
+        if (this.step % 3 === 1) return true; // then on every 3rd step
         return false;
     }
 
-    next_step() { // 计算下一个蛇头的位置
+    next_step() { // compute the next head cell
         const d = this.directions.shift();
-        this.eye_direction = d; // 蛇头走一步之后，眼睛朝向变成当前方向
+        this.eye_direction = d; // the eyes turn to face the direction of travel
         this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
         this.status = "move";
         this.step++;
@@ -86,7 +86,7 @@ export class Snake extends AcGameObject {
             this.cells[i] = JSON.parse(JSON.stringify(this.cells[i - 1]));
         }
 
-        if (!this.gamemap.check_valid(this.next_cell)) { // next_cell 位置无效，蛇死亡
+        if (!this.gamemap.check_valid(this.next_cell)) { // next_cell is invalid, the snake dies
             this.status = "die";
         }
     }
@@ -96,16 +96,16 @@ export class Snake extends AcGameObject {
         const dy = this.next_cell.y - this.cells[0].y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         const move_distance = this.speed * this.timedelta / 1000;
-        // 这一帧就能走到也算到了：页面卡顿或切回后台标签页时 timedelta 很大，按比例走会冲过头，在目标附近来回抖
-        if (distance < this.eps || move_distance >= distance) { // 走到目标位置了
+        // Also count it as arrived if this frame would reach the target: after a stall or when a background tab comes back, timedelta is large, and a proportional move would overshoot and jitter around the target
+        if (distance < this.eps || move_distance >= distance) { // reached the target cell
             this.status = "idle";
-            this.cells[0] = this.next_cell; // 添加新的蛇头
+            this.cells[0] = this.next_cell; // add the new head
             this.next_cell = null;
 
-            if (!this.check_tail_increasing()) { // 如果蛇尾不增长，就删掉蛇尾
+            if (!this.check_tail_increasing()) { // drop the tail unless the snake grows
                 this.cells.pop();
             }
-        } else { // 没走到，继续走
+        } else { // not there yet, keep moving
             this.cells[0].x += dx * move_distance / distance;
             this.cells[0].y += dy * move_distance / distance;
 
@@ -120,7 +120,7 @@ export class Snake extends AcGameObject {
         }
     }
 
-    update() { // 每一帧都会调用
+    update() { // called every frame
         if (this.status === "move") {
             this.update_move();
         }
@@ -153,10 +153,10 @@ export class Snake extends AcGameObject {
         const L = this.gamemap.L;
         const ctx = this.gamemap.ctx;
 
-        const r = L * 0.38; // 蛇身半径 
-        const border = L * 0.045; //白色贴纸切边宽度
+        const r = L * 0.38; // body radius
+        const border = L * 0.045; // width of the white sticker-style outline
 
-        // 折纸蛇的感觉
+        // drop shadow for a paper-cutout look
         ctx.save();
         ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
         ctx.shadowBlur = 6;
@@ -166,12 +166,12 @@ export class Snake extends AcGameObject {
         this.draw_body(r + border, "white");
         this.draw_body(r, color);
 
-        // 恢复原始状态（移除阴影）
+        // restore the context (removes the shadow)
         ctx.restore();
 
-        // 绘制蛇眼
+        // eyes
         if (this.status === "die") {
-            // 绘制死亡晕厥 X X 眼
+            // dead: X X eyes
             ctx.strokeStyle = "#475569";
             ctx.lineWidth = L * 0.025;
             ctx.lineCap = "round";
@@ -187,16 +187,16 @@ export class Snake extends AcGameObject {
                 ctx.stroke();
             }
         } else {
-            // 正常状态：绘制黑色瞳孔 + 反光
+            // alive: dark pupils with a highlight
             for (let i = 0; i < 2; i++) {
                 const eye_x = (this.cells[0].x + this.eye_dx[this.eye_direction][i] * 0.12) * L;
                 const eye_y = (this.cells[0].y + this.eye_dy[this.eye_direction][i] * 0.12) * L;
-                // 黑眼珠
+                // pupil
                 ctx.fillStyle = "#1E293B";
                 ctx.beginPath();
                 ctx.arc(eye_x, eye_y, L * 0.065, 0, 2 * Math.PI);
                 ctx.fill();
-                // 眼睛反光高光小白点
+                // small white highlight
                 ctx.fillStyle = "white";
                 ctx.beginPath();
                 ctx.arc(eye_x - L * 0.02, eye_y - L * 0.02, L * 0.025, 0, 2 * Math.PI);
@@ -207,23 +207,23 @@ export class Snake extends AcGameObject {
         this.render_name();
     }
 
-    render_name() { // 在蛇头上方显示用户名
+    render_name() { // draw the username above the head
         if (!this.username) return;
         const L = this.gamemap.L;
         const ctx = this.gamemap.ctx;
         let name = this.username.length > 12 ? this.username.slice(0, 12) + "…" : this.username;
-        if (this.is_me) name += "（你）";
+        if (this.is_me) name += " (you)";
 
         ctx.save();
         ctx.font = `bold ${Math.max(10, Math.round(L * 0.3))}px sans-serif`;
         const w = ctx.measureText(name).width + L * 0.24;
         const h = L * 0.42;
-        // 标签中心在蛇头上方；靠近地图左右边缘时往里收，不被画布裁掉
+        // Center the label above the head; near the left or right edge, shift it inward so the canvas does not clip it
         const head = this.cells[0];
         const x = Math.min(Math.max(head.x * L, w / 2), ctx.canvas.width - w / 2);
         const y = (head.y - 0.62) * L;
 
-        // 自己的蛇用琥珀色底、深色字，对手用半透明深色底、白字，草地背景上都看得清
+        // Your snake: amber label with dark text. Opponent: translucent dark label with white text. Both stay readable on the grass.
         ctx.fillStyle = this.is_me ? "#F59E0B" : "rgba(15, 23, 42, 0.65)";
         ctx.beginPath();
         ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2);

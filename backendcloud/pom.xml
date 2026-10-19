@@ -50,7 +50,7 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<!-- 所有子模块共用的依赖 -->
+	<!-- Dependencies shared by every module -->
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -77,7 +77,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-			<!-- JDK 23+ 默认不再自动运行注解处理器，需要显式声明 Lombok -->
+			<!-- JDK 23+ no longer runs annotation processors by default, so declare Lombok explicitly -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

@@ -8,19 +8,19 @@ import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
 
-// baseUrl 填的是要调用的服务的地址：botrunningsystem 调用 backend 和 go-judge 沙箱
+// baseUrl is the address of the service being called: botrunningsystem calls backend and the go-judge sandbox
 @Configuration
 public class RestClientConfig {
     @Bean
     public RestClient backendClient(@Value("${services.backend-url}") String url, InternalAccess internalAccess) {
         return RestClient.builder().baseUrl(url)
-                .defaultHeader(InternalAccess.HEADER, internalAccess.getToken()).build(); // 带上内部接口的共享密钥
+                .defaultHeader(InternalAccess.HEADER, internalAccess.getToken()).build(); // carries the internal shared secret
     }
 
     @Bean
     public RestClient sandboxClient(@Value("${sandbox.url}") String sandboxUrl) {
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
-        requestFactory.setReadTimeout(Duration.ofSeconds(90)); // 编译最长 60 秒，留点余量
+        requestFactory.setReadTimeout(Duration.ofSeconds(90)); // compiling takes up to 60 seconds; leave some margin
         return RestClient.builder().baseUrl(sandboxUrl).requestFactory(requestFactory).build();
     }
 }

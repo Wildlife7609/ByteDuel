@@ -25,11 +25,11 @@ public class LoginController {
         return loginService.getToken(username, password);
     }
 
-    // 登录失败次数过多、账号被暂时锁定（见 LoginAttemptLimiter）：返回 429（请求过多），前端显示 error_message
+    // Too many failed logins and the account is temporarily locked (see LoginAttemptLimiter): return 429 Too Many Requests; the frontend shows error_message
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<Map<String, String>> handleLocked(LockedException e) {
         long minutes = LoginAttemptLimiter.LOCK_DURATION.toMinutes();
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                .body(Map.of("error_message", "登录失败次数过多，账号已锁定 " + minutes + " 分钟，请稍后再试"));
+                .body(Map.of("error_message", "Too many failed login attempts. This account is locked for " + minutes + " minutes. Please try again later."));
     }
 }

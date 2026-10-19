@@ -2,13 +2,13 @@
     <div class="result-board">
         <div class="result-board-content">
             <div class="result-board-text">
-               <span v-if="pkStore.loser === 'all'">平局</span>
-                <span v-else-if="pkStore.loser === 'A' && String(pkStore.gameObject.a_id) === userStore.id">你输了</span>
-                <span v-else-if="pkStore.loser === 'B' && String(pkStore.gameObject.b_id) === userStore.id">你输了</span>
-                <span v-else>你赢了</span>
+               <span v-if="pkStore.loser === 'all'">Draw</span>
+                <span v-else-if="pkStore.loser === 'A' && String(pkStore.gameObject.a_id) === userStore.id">You lost</span>
+                <span v-else-if="pkStore.loser === 'B' && String(pkStore.gameObject.b_id) === userStore.id">You lost</span>
+                <span v-else>You won</span>
             </div>
             <button type="button" class="btn btn-warning result-board-button" @click="handleClick">
-                返回大厅
+                Back to lobby
             </button>
         </div>
     </div>
@@ -42,9 +42,9 @@ pkStore.updateLoser("none");
     padding-top: 35vh;
 }
 
-/* 与 MatchGround 保持一致的深色毛玻璃风格 */
+/* same dark frosted-glass style as MatchGround */
 .result-board-content {
-    width: 400px;
+    width: min(400px, calc(100vw - 32px));
     height: 220px;
     background: rgba(30, 41, 59, 0.7);
     backdrop-filter: blur(16px);

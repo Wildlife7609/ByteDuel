@@ -24,7 +24,7 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                // 只给 backend 调用
+                                                // only backend may call these
                                                 .requestMatchers("/bot/add/", "/bot/compile/")
                                                 .access((authentication, context) -> new AuthorizationDecision(
                                                                 internalAccess.isAllowed(context.getRequest())))

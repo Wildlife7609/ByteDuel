@@ -102,7 +102,7 @@ The sandbox container runs with `privileged: true`, because go-judge needs to cr
 
 ## Deployment
 
-Production deployment is documented in [deploy/README.md](deploy/README.md) (in Chinese). It covers TLS with a Cloudflare Origin certificate, firewall rules, database backups and troubleshooting.
+Production deployment is documented in [deploy/README.md](deploy/README.md). It covers TLS with a Cloudflare Origin certificate, firewall rules, database backups and troubleshooting.
 
 ## Project layout
 

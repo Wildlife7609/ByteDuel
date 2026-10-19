@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         queryWrapper.eq("username", username);
         User user = userMapper.selectOne(queryWrapper);
         if (user == null) {
-            throw new UsernameNotFoundException("用户不存在");
+            throw new UsernameNotFoundException("User not found");
         }
         return new UserDetailsImpl(user, !loginAttemptLimiter.isLocked(username));
     }

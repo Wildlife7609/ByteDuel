@@ -1,4 +1,4 @@
-# 在 go-judge 官方 mount.yaml 的基础上，加了预编译好的 Go 标准库缓存（搜索 gocache）
+# The official go-judge mount.yaml, plus the precompiled Go standard library cache (search for gocache)
 mount:
   # Basic binaries and libraries
   - type: bind
@@ -50,7 +50,7 @@ mount:
     source: /etc/java-21-openjdk
     target: /etc/java-21-openjdk
     readonly: true
-  # 预编译好的 Go 标准库缓存，只读。Go 要求缓存目录可写，编译前会复制到 /tmp/gocache，见 Dockerfile
+  # Precompiled Go standard library cache, read-only. Go needs a writable cache, so it is copied to /tmp/gocache before compiling; see the Dockerfile
   - type: bind
     source: /opt/gocache
     target: /opt/gocache

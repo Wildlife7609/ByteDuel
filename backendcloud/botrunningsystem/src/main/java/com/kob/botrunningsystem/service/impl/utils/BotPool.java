@@ -14,30 +14,30 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Component
 public class BotPool extends Thread {
     @Autowired
-    @Qualifier("backendClient") // 有两个 RestClient，按名字指定用哪一个
+    @Qualifier("backendClient") // there are two RestClients, so pick one by name
     private RestClient backendClient;
     @Autowired
     private Sandbox sandbox;
 
     private final BlockingQueue<BotTask> bots = new LinkedBlockingQueue<>();
 
-    @PostConstruct // 依赖注入完成后再启动线程，保证 backendClient 已就绪
+    @PostConstruct // start the thread after injection, so backendClient is ready
     public void init() {
         start();
     }
 
     public void addBot(Integer userId, Language language, String botCode, String input) {
-        bots.add(new BotTask(userId, language, botCode, input)); // 线程安全，立刻返回
+        bots.add(new BotTask(userId, language, botCode, input)); // thread-safe, returns immediately
     }
 
     private void consumeBot(BotTask botTask) {
-        // 由虚拟线程等待沙箱的运行结果，boss 线程不被阻塞，可以马上处理下一个任务
+        // a virtual thread waits for the sandbox result, so the boss thread is free to take the next task
         Thread.ofVirtual().start(() -> runBot(botTask));
     }
 
     private void runBot(BotTask botTask) {
         try {
-            // 超时由沙箱控制，超时、运行出错或输出不合法都不发送结果，Game 那边超时判负
+            // The sandbox enforces the time limit. On timeout, runtime error or invalid output, send nothing; Game then rules it a loss on timeout
             String output = sandbox.run(botTask.getLanguage(), botTask.getBotCode(), botTask.getInput());
             Integer direction = parseDirection(output);
             if (direction == null)
@@ -72,7 +72,7 @@ public class BotPool extends Thread {
             } catch (InterruptedException e) {
                 break;
             } catch (Exception e) {
-                e.printStackTrace(); // 单个 Bot 出错，继续处理下一个
+                e.printStackTrace(); // one bot failed; move on to the next
             }
         }
     }

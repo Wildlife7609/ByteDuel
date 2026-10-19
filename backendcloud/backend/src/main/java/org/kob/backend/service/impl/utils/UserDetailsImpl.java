@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private User user;
-    private boolean accountNonLocked = true; // 登录失败次数过多时为 false，见 LoginAttemptLimiter
+    private boolean accountNonLocked = true; // false after too many failed logins, see LoginAttemptLimiter
 
     public UserDetailsImpl(User user) {
         this.user = user;
@@ -38,7 +38,7 @@ public class UserDetailsImpl implements UserDetails {
         return user.getUsername();
     }
 
-    // 返回 false 时，Spring Security 在校验密码之前就拒绝登录，抛出 LockedException
+    // when false, Spring Security rejects the login before checking the password and throws LockedException
     @Override
     public boolean isAccountNonLocked() {
         return accountNonLocked;

@@ -14,6 +14,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(webSocketHandler, "/websocket/{token}")
-                .setAllowedOrigins("*"); // 允许跨域
+                .setAllowedOrigins("*"); // allow cross-origin connections
     }
 }

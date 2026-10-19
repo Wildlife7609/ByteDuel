@@ -24,7 +24,7 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                // 匹配接口只给 backend 调用
+                                                // only backend may call the matching endpoints
                                                 .requestMatchers("/player/add/", "/player/remove/")
                                                 .access((authentication, context) -> new AuthorizationDecision(
                                                                 internalAccess.isAllowed(context.getRequest())))

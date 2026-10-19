@@ -23,32 +23,32 @@ public class RegisterServiceImpl implements RegisterService {
     public Map<String, String> register(String username, String password, String confirmedPassword) {
         Map<String, String> map = new HashMap<>();
         if (username == null || username.isBlank()) {
-            map.put("error_message", "用户名不能为空");
+            map.put("error_message", "Username cannot be empty");
             return map;
         }
         if (password == null || confirmedPassword == null || password.isEmpty() || confirmedPassword.isEmpty()) {
-            map.put("error_message", "密码不能为空");
+            map.put("error_message", "Password cannot be empty");
             return map;
         }
         username = username.trim();
         if (username.length() > 100) {
-            map.put("error_message", "用户名长度不能大于100");
+            map.put("error_message", "Username cannot exceed 100 characters");
             return map;
         }
         if (password.length() > 100 || confirmedPassword.length() > 100) {
-            map.put("error_message", "密码长度不能大于100");
+            map.put("error_message", "Password cannot exceed 100 characters");
             return map;
         }
         if (!password.equals(confirmedPassword)) {
-            map.put("error_message", "两次输入的密码不一致");
+            map.put("error_message", "Passwords do not match");
             return map;
         }
 
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username);
-        Long count = userMapper.selectCount(queryWrapper); // 为了性能改查数量而不是查对象
+        Long count = userMapper.selectCount(queryWrapper); // count rows instead of loading them
         if (count > 0) {
-            map.put("error_message", "用户名已存在");
+            map.put("error_message", "Username is already taken");
             return map;
         }
         String encodePassword = passwordEncoder.encode(password);
