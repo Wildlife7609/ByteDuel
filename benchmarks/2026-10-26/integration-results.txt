@@ -1,0 +1,18 @@
+homepage status= 200 body= <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name
+internal endpoint block status= 403 body= {"timestamp":"2026-10-26T21:01:26.891Z","status":403,"error":"Forbidden","path":"/pk/start/game/"}
+register status= 200 body= {"error_message":"success"}
+login status= 200 body= (redacted)
+valid bot status= 200 body= {"error_message":"success"}
+invalid bot status= 200 body= {"error_message":"File \"main.py\", line 1\n    def broken(:\n               ^\nSyntaxError: invalid syntax"}
+wrong password attempt 1 status 403 body {"timestamp":"2026-10-26T21:01:29.183Z","status":403,"error":"Forbidden","path":"/user/account/token/"}
+wrong password attempt 2 status 403 body {"timestamp":"2026-10-26T21:01:29.272Z","status":403,"error":"Forbidden","path":"/user/account/token/"}
+wrong password attempt 3 status 403 body {"timestamp":"2026-10-26T21:01:29.358Z","status":403,"error":"Forbidden","path":"/user/account/token/"}
+wrong password attempt 4 status 403 body {"timestamp":"2026-10-26T21:01:29.489Z","status":403,"error":"Forbidden","path":"/user/account/token/"}
+wrong password attempt 5 status 403 body {"timestamp":"2026-10-26T21:01:29.575Z","status":403,"error":"Forbidden","path":"/user/account/token/"}
+wrong password attempt 6 status 429 body {"error_message":"Too many failed login attempts. This account is locked for 10 minutes. Please try again later."}

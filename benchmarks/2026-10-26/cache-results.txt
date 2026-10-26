@@ -1,0 +1,22 @@
+miss 0 719.34 ms success
+hit 0 11.18 ms success
+miss 1 258.84 ms success
+hit 1 7.55 ms success
+miss 2 313.09 ms success
+hit 2 8.82 ms success
+miss 3 309.77 ms success
+hit 3 8.16 ms success
+miss 4 249.58 ms success
+hit 4 11.56 ms success
+miss 5 346.32 ms success
+hit 5 7.8 ms success
+miss 6 264.5 ms success
+hit 6 7.9 ms success
+miss 7 260.62 ms success
+hit 7 6.85 ms success
+miss 8 259.74 ms success
+hit 8 14.48 ms success
+miss 9 753.15 ms success
+hit 9 12.15 ms success
+miss median_ms 287.14 all_ms [719.34, 258.84, 313.09, 309.77, 249.58, 346.32, 264.5, 260.62, 259.74, 753.15]
+hit median_ms 8.49 all_ms [11.18, 7.55, 8.82, 8.16, 11.56, 7.8, 7.9, 6.85, 14.48, 12.15]
