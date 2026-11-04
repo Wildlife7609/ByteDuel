@@ -135,8 +135,19 @@ public class Sandbox {
         cmd.put("copyIn", Map.of(language.getSourceFile(), Map.of("content", code)));
         cmd.put("copyOutCached", List.of(language.getExecutable()));
         Result result = send(cmd);
-        if (!"Accepted".equals(result.status()))
+        if (!"Accepted".equals(result.status())) {
+            // go-judge can cache an output even when compilation fails (Python's output is its source file).
+            if (result.fileIds() != null) {
+                for (String fileId : result.fileIds().values()) {
+                    try {
+                        sandboxClient.delete().uri("/file/{id}", fileId).retrieve().toBodilessEntity();
+                    } catch (Exception e) {
+                        e.printStackTrace(); // preserve the compilation error if cleanup fails
+                    }
+                }
+            }
             throw new CompileException(compileMessage(result));
+        }
         return result.fileIds().get(language.getExecutable());
     }
 
