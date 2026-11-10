@@ -1,0 +1,33 @@
+go cold 0 Accepted
+go cold 1 Accepted
+go cold 2 Accepted
+go cold 3 Accepted
+go cold 4 Accepted
+go cold 5 Accepted
+go cold 6 Accepted
+go cold 7 Accepted
+go cold 8 Accepted
+go cold 9 Accepted
+go cold n= 10 median= 4644.41 ms values_ms= [4957.98, 4695.95, 4643.72, 4575.5, 4645.1, 4770.42, 4612.73, 4691.55, 4606.29, 4390.03]
+go prebuilt 0 Accepted
+go prebuilt 1 Accepted
+go prebuilt 2 Accepted
+go prebuilt 3 Accepted
+go prebuilt 4 Accepted
+go prebuilt 5 Accepted
+go prebuilt 6 Accepted
+go prebuilt 7 Accepted
+go prebuilt 8 Accepted
+go prebuilt 9 Accepted
+go prebuilt n= 10 median= 249.75 ms values_ms= [244.91, 266.72, 239.85, 252.69, 274.43, 305.59, 244.97, 244.99, 301.4, 246.82]
+execution cpp n= 10 median= 5.74 ms values_ms= [6.51, 5.69, 6.02, 5.57, 5.55, 5.8, 5.48, 5.48, 7.08, 6.0]
+execution java n= 10 median= 39.53 ms values_ms= [41.13, 39.15, 41.12, 39.91, 39.97, 38.74, 38.17, 37.73, 41.19, 37.33]
+execution python n= 10 median= 18.6 ms values_ms= [21.95, 20.4, 17.96, 18.19, 17.96, 17.55, 19.01, 20.49, 19.01, 17.93]
+execution go n= 10 median= 7.97 ms values_ms= [7.01, 7.39, 7.77, 9.58, 7.61, 8.18, 10.22, 8.34, 9.32, 7.05]
+check syntax status Nonzero Exit Status elapsed_ms 41.08 stderr   File "main.py", line 1
+    def broken(:
+               ^
+SyntaxError: invalid syntax
+
+check infinite status Time Limit Exceeded elapsed_ms 2007.31 stderr 
+check memory status Memory Limit Exceeded elapsed_ms 292.26 stderr 

@@ -1,0 +1,6 @@
+seed=20261026 case=52 bfs_result=true dfs_result=true elapsed_ms=10889.244 calls=643469533
+seed=20261026 case=85 bfs_result=true dfs_result=true elapsed_ms=1110.684 calls=86157155
+seed=20261026 case=141 bfs_result=true dfs_result=true elapsed_ms=123.598 calls=6743453
+seed=20261026 case=156 bfs_result=true dfs_result=true elapsed_ms=102.443 calls=9206788
+seed=20261026 case=172 bfs_result=true dfs_timeout=true cutoff_ms=30000 elapsed_ms=30054.601 calls=2375860224
+seed=20261026 case=188 bfs_result=true dfs_result=true elapsed_ms=2803.247 calls=228315741

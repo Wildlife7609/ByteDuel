@@ -8,6 +8,8 @@ Live at **[byteduel.de5.net](https://byteduel.de5.net)**
 
 ByteDuel is an online two-player snake game. You can play with the keyboard, or write a bot in **C++, Java, Python or Go** and let it play for you. Players are matched by rating. Bot code runs on the server in an isolated sandbox. Every match is saved and can be replayed.
 
+The deployed platform has supported **10+ registered accounts** and **100+ matches** ([public counts checked November 8, 2026](benchmarks/2026-11-08-full/production-counts.json)).
+
 ## Features
 
 - **Real-time matches over WebSocket.** Both snakes move at the same time, once per turn.
@@ -124,11 +126,11 @@ ByteDuel started as the King of Bots project from AcWing's Spring Boot course. T
 
 On top of that version, I added:
 
-- **Sandboxed bots in four languages.** C++, Java, Python and Go bots compile and run in go-judge with CPU, memory and process limits and no network access. The Go standard library is prebuilt into the sandbox image to cut compile time from about 6s to 0.9s.
-- **Compile checks and caching.** A bot that does not compile is rejected when it is saved. Compiled binaries are cached and both bots are compiled before a match starts, so every turn stays within the 5-second limit.
+- **Sandboxed bots in four languages.** C++, Java, Python and Go bots compile and run in go-judge with CPU, memory and process limits and no network access. Prebuilding common Go standard-library packages reduced median compilation time by over 80% in a [local benchmark](benchmarks/2026-11-08-full/README.md#go-standard-library-cache).
+- **Compile checks and caching.** A bot that does not compile is rejected when it is saved. Outputs are cached by language and source, and both bots are compiled before a match starts. Earlier local measurements showed repeated checks running 7×–113× faster across the four languages; the raw results for that run were not retained. A [subsequent recorded retest](benchmarks/2026-11-08-full/README.md#compiled-output-cache) measured ratios of median cache-miss to cache-hit times from 9.06× to 126.62×.
 - **Deployment.** Docker Compose on an ARM VM behind Cloudflare and Caddy, with end-to-end TLS. The database moved from MySQL to PostgreSQL.
 - **Security.** Services authenticate each other with a shared secret compared in constant time, Caddy blocks internal endpoints from the outside, and an account is locked for 10 minutes after 5 failed logins. The frontend shows the lockout message.
 - **Accounts and bots.** Each user can keep up to 10 bots, and new bots start from a template in the chosen language. An account plays from one window at a time: opening the game in a new window closes the old connection.
 - **Stack.** Upgraded to Java 25 and Spring Boot 4, and services call each other with `RestClient` instead of `RestTemplate`.
 - **UI.** A redesigned look: papercraft-style snakes on a grass board, with usernames shown above the snake heads and your own snake highlighted.
-- **Fixes.** A backtracking DFS in map generation could stall game start for 20 seconds; it is now a BFS. The frontend no longer drops moves and shows wrong results when a tab is in the background. go-judge crashed on arm64 because its seccomp profile was missing a syscall; I reported it upstream ([criyle/go-judge#202](https://github.com/criyle/go-judge/issues/202)), and it was fixed in v1.13.3.
+- **Fixes.** Replaced a backtracking DFS in map generation that had caused game-start stalls of up to 20 seconds with BFS. In [200 local connectivity checks](benchmarks/2026-11-08/README.md#map-connectivity), BFS completed each check in under 0.1 ms; a [subsequent retest](benchmarks/2026-11-08-full/README.md#map-connectivity) measured a maximum of 0.111 ms. The frontend no longer drops moves and shows wrong results when a tab is in the background. go-judge requests failed on arm64 Linux because its seccomp profile was missing a syscall; I reported it upstream ([criyle/go-judge#202](https://github.com/criyle/go-judge/issues/202)), and it was fixed in v1.13.3.

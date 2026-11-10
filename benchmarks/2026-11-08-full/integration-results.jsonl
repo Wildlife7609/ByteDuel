@@ -1,0 +1,65 @@
+{"event": "homepage", "status": 200, "has_html": true}
+{"event": "blocked_internal", "status": 403}
+{"event": "register", "username": "bench_alpha", "status": 200, "response": "{\"error_message\":\"success\"}"}
+{"event": "login", "username": "bench_alpha", "status": 200, "token_present": true}
+{"event": "register", "username": "bench_beta", "status": 200, "response": "{\"error_message\":\"success\"}"}
+{"event": "login", "username": "bench_beta", "status": 200, "token_present": true}
+{"event": "add_bot", "language": "cpp", "status": 200, "response": "{\"error_message\":\"success\"}", "ms": 818.7}
+{"event": "add_bot", "language": "python", "status": 200, "response": "{\"error_message\":\"success\"}", "ms": 82.984}
+{"event": "add_bot", "language": "java", "status": 200, "response": "{\"error_message\":\"success\"}", "ms": 807.081}
+{"event": "add_bot", "language": "go", "status": 200, "response": "{\"error_message\":\"success\"}", "ms": 436.869}
+{"event": "reject_invalid_python", "status": 200, "response": "{\"error_message\":\"File \\\"main.py\\\", line 1\\n    def broken(:\\n               ^\\nSyntaxError: invalid syntax\"}"}
+{"event": "websocket", "player": "B", "type": "match-success", "languages": ["cpp", "java"], "map_rows": 15, "map_columns": 14}
+{"event": "websocket", "player": "A", "type": "match-success", "languages": ["cpp", "java"], "map_rows": 15, "map_columns": 14}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["cpp", "java"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "result", "languages": ["cpp", "java"], "loser": "all"}
+{"event": "websocket", "player": "B", "type": "result", "languages": ["cpp", "java"], "loser": "all"}
+{"event": "websocket", "player": "A", "type": "match-success", "languages": ["python", "go"], "map_rows": 15, "map_columns": 14}
+{"event": "websocket", "player": "B", "type": "match-success", "languages": ["python", "go"], "map_rows": 15, "map_columns": 14}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "A", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "move", "languages": ["python", "go"], "a_step": 1, "b_step": 3}
+{"event": "websocket", "player": "B", "type": "result", "languages": ["python", "go"], "loser": "all"}
+{"event": "websocket", "player": "A", "type": "result", "languages": ["python", "go"], "loser": "all"}
+{"event": "saved_matches", "before": 0, "after": 2}
+{"event": "complete", "result": "pass"}

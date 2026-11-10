@@ -1,0 +1,13 @@
+{
+  "checked_at_utc": "2026-11-08T16:15:33.780769+00:00",
+  "results": {
+    "accounts": {
+      "url": "https://byteduel.de5.net/api/ranklist/getlist/?page=1",
+      "total": 12
+    },
+    "matches": {
+      "url": "https://byteduel.de5.net/api/record/getlist/?page=1",
+      "total": 126
+    }
+  }
+}
